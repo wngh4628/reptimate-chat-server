@@ -12,7 +12,6 @@ async function bootstrap() {
   logger.info(
     `====================== MYSQL_HOST Start - ${process.env.MYSQL_HOST} !!======================`,
   );
-
   const app = await NestFactory.create(AppModule);
 
   // 스웨거 시작
