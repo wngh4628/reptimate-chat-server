@@ -6,12 +6,18 @@ import { TypeOrmExModule } from 'src/core/typeorm-ex.module';
 import { ChatMemberRepository } from './repositories/chat-member.repository';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { ChatConversationRepository } from './repositories/chat-conversation.repository';
+import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
+import { FCMService } from 'src/utils/fcm.service';
+import { UserService } from '../user/user.service';
+import { UserRepository } from '../user/repositories/user.repository';
 
 @Module({
   imports: [
     TypeOrmExModule.forCustomRepository([
       ChatMemberRepository,
       ChatConversationRepository,
+      FbTokenRepository,
+      UserRepository,
     ]),
     RedisModule.forRoot({
       readyLog: true,
@@ -21,7 +27,7 @@ import { ChatConversationRepository } from './repositories/chat-conversation.rep
       },
     }),
   ],
-  providers: [EventsGateway, ChatService], // DynamoDBService를 providers 배열에 추가합니다.
+  providers: [EventsGateway, ChatService, FCMService, UserService], // DynamoDBService를 providers 배열에 추가합니다.
   controllers: [Chatcontroller],
   exports: [ChatService, TypeOrmExModule],
 })

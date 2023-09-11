@@ -59,18 +59,18 @@ export class AuctionChatcontroller {
       '해당 경매 첫 비딩 시, ON 처리 해야합니다. action은 on/off 입니다.',
   })
   @ApiOkPaginationResponseTemplate({ type: Number })
-  @UseAuthGuards()
+  // @UseAuthGuards()
   @Post('/:auctionIdx')
   async auctionAlertSet(
     @Res() res,
     @AuthUser() user: User,
     @Param('auctionIdx') auctionIdx: number,
-    @Query('action') action: string,
+    @Body() dto: { userIdx: number; action: string },
   ) {
     const result = await this.chatService.auctionAlertSet(
       auctionIdx,
-      user.idx,
-      action,
+      dto.userIdx,
+      dto.action,
     );
     return HttpResponse.ok(res, result);
   }

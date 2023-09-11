@@ -18,10 +18,14 @@ import { asyncUploadToS3, S3FolderName } from 'src/utils/s3-utils';
 import DateUtils from 'src/utils/date-utils';
 import { SocialMethodType } from '../auth/helpers/constants';
 import { FindPasswordDto } from './dtos/find-password.dto';
+import { RedisService } from '@liaoliaots/nestjs-redis';
 
 @Injectable()
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private readonly redisService: RedisService,
+  ) {}
   /**
    *  회원가입
    * @param dto CreateUserDto
@@ -197,7 +201,6 @@ export class UserService {
    */
   async removeByPassword(dto: DeleteUserDto, userIdx: number) {
     const password = dto.password;
-
     const user = await this.userRepository.findByUserIdx(userIdx);
     if (!user) {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
@@ -205,5 +208,22 @@ export class UserService {
 
     await validatePassword(password, user.password);
     await this.userRepository.softDelete(userIdx);
+  }
+  async getUserDetailInfo(userIdx: number): Promise<User> {
+    const redis = this.redisService.getClient();
+    const userInfo = await redis.get(`userInfo${userIdx}`);
+    let user;
+    if (!userInfo) {
+      user = await this.userRepository.findOne({
+        where: {
+          idx: userIdx,
+        },
+      });
+      const userString = JSON.stringify(user); // 주어진 자료구조를 문자열로 변환
+      await redis.set(`userInfo${userIdx}`, userString); // 문자열로 변환된 자료구조를 Redis에 저장
+    } else {
+      user = JSON.parse(userInfo); // Redis에서 가져온 문자열을 자료구조로 변환
+    }
+    return user;
   }
 }

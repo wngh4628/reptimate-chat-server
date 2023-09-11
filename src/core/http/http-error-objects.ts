@@ -135,6 +135,16 @@ export const HttpErrorConstants = {
     message: '채팅방을 찾을 수 없습니다.',
   } as HttpErrorFormat,
 
+  AUCTION_END: {
+    errorCode: 'AUCTION_END',
+    message: '해당 경매가 마감 되었습니다.',
+  } as HttpErrorFormat,
+
+  AUCTION_PRICE_ROW: {
+    errorCode: 'AUCTION_PRICE_ROW',
+    message: '현재 입찰가보다 높은 금액을 입력 해주세요.',
+  } as HttpErrorFormat,
+
   LIVEROOM_NOT_HOST: {
     errorCode: 'LIVEROOM_NOT_HOST',
     message: '라이브 방송의 방장이 아닙니다.',
@@ -143,5 +153,20 @@ export const HttpErrorConstants = {
   LIVEROOM_NOT_EXIST: {
     errorCode: 'LIVEROOM_NOT_EXIST',
     message: '라이브 방송이 존재하지 않습니다.',
+  } as HttpErrorFormat,
+
+  LIVEROOM_TOO_LONG: {
+    errorCode: 'LIVEROOM_TOO_LONG',
+    message: '메시지가 100자 이상입니다.',
+  } as HttpErrorFormat,
+
+  LIVEROOM_NO_CHAT: {
+    errorCode: 'LIVEROOM_NO_CHAT',
+    message: '해당 라이브 방송에서 채팅 금지입니다.',
+  } as HttpErrorFormat,
+
+  LIVEROOM_BAN: {
+    errorCode: 'LIVEROOM_BAN',
+    message: '해당 라이브 방송에서 입장 금지입니다.',
   } as HttpErrorFormat,
 };

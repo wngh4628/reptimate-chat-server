@@ -1,8 +1,9 @@
 import { UpdateUserDto } from './../dtos/update-user.dto';
 import BaseEntity from 'src/core/entity/base.entity';
 import { hashPassword } from 'src/utils/password.utils';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { SocialMethodType } from 'src/domains/auth/helpers/constants';
+import { BoardAuction } from 'src/domains/auction_chat/entities/board-auction.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -59,6 +60,9 @@ export class User extends BaseEntity {
     default: null,
   })
   refreshToken: string;
+
+  // @OneToMany(() => BoardAuction, (schedule) => schedule.user)
+  // schedules: BoardAuction[];
 
   static from({
     email,

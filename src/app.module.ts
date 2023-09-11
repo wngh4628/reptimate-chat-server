@@ -8,8 +8,9 @@ import { AppService } from './app.service';
 import { UserModule } from './domains/user/user.module';
 import { LoggerMiddleware } from './core/middlewares/logger.middleware';
 import { ChatModule } from './domains/chat/chat.module';
-import { AuctionChaModule } from './domains/auction_chat/auction_chat.module';
+import { AuctionChatModule } from './domains/auction_chat/auction_chat.module';
 import { LiveChaModule } from './domains/live_chat/live_chat.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -34,8 +35,9 @@ import { LiveChaModule } from './domains/live_chat/live_chat.module';
     UserModule,
     AuthModule,
     ChatModule,
-    AuctionChaModule,
+    AuctionChatModule,
     LiveChaModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

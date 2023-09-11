@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -13,7 +13,6 @@ import { Namespace, Socket } from 'socket.io';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import { BoardRepository } from './repositories/board.repository';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
-import { log } from 'winston';
 
 @WebSocketGateway({
   namespace: 'LiveChat',
@@ -50,7 +49,7 @@ export class LiveChatGateway
     });
 
     this.nsp.adapter.on('message', (roomName) => {
-      console.log(roomName);
+      console.log();
     });
 
     this.logger.log('웹소켓 서버 초기화 ✅');
@@ -70,13 +69,16 @@ export class LiveChatGateway
     @MessageBody() message: { userIdx: number; message: string; room: string },
   ) {
     const { userIdx, room } = message;
+    if (message.message.length > 100) {
+      throw new BadRequestException(HttpErrorConstants.LIVEROOM_TOO_LONG);
+    }
     const noChatKey = `live-noChat-${room}`;
     const key = `live-chat-${room}`;
     const redis = this.redisService.getClient();
     const isNoChat = await redis.sismember(noChatKey, userIdx.toString());
     if (isNoChat) {
       socket.emit('no_chat', 'no chat');
-      throw new Error('You are no chat from this room.');
+      throw new NotFoundException(HttpErrorConstants.LIVEROOM_NO_CHAT);
     }
     const score = Date.now();
     //1. 레디스 저장
@@ -88,6 +90,7 @@ export class LiveChatGateway
     };
     await redis.zadd(key, score, JSON.stringify(jsonMessage));
     //2. 발송
+    console.log('room', this.rooms);
     this.nsp.to(message.room).emit('live_message', jsonMessage);
   }
   @SubscribeMessage('join-live')
@@ -112,9 +115,10 @@ export class LiveChatGateway
     const isBanned = await redis.sismember(banKey, userIdx.toString());
     if (isBanned) {
       socket.emit('ban-notification', {
-        message: 'You are banned from this room.',
+        message: HttpErrorConstants.LIVEROOM_BAN,
       });
-      throw new Error('You are banned from this room.');
+      socket.disconnect();
+      throw new NotFoundException(HttpErrorConstants.LIVEROOM_BAN);
     }
     //방이 처음 만들어저면 새로 만들고 추가, 기존에 존재하면 해당 유저만 추가
     if (this.rooms.has(roomName)) {
@@ -147,9 +151,6 @@ export class LiveChatGateway
         this.nsp.to(room).emit('live_participate', jsonMessage);
       }
     });
-    this.logger.log(
-      `라이브 스트리밍에 ${message.userIdx}이(가) 방 ${room}에 참여하였습니다.`,
-    );
   }
   @SubscribeMessage('leave-room')
   async leaveRoom(
@@ -160,7 +161,6 @@ export class LiveChatGateway
       roomIdx: string;
     },
   ) {
-    console.log('leave-room message', message);
     const { userIdx, roomIdx } = message;
     const redis = this.redisService.getClient();
     await userOut(roomIdx, userIdx, redis, this.rooms); //레디스 유저 목록에서 삭제 및 방에서 데이터 삭제 처리
@@ -172,7 +172,6 @@ export class LiveChatGateway
   //라이브 방송에서 강제 퇴장 시키는 기능: 유저 목록에서 삭제하고 차단 목록에 추가합니다.
   @SubscribeMessage('user_ban')
   async userBan(
-    @ConnectedSocket() socket: Socket,
     @MessageBody()
     message: {
       userIdx: number;
@@ -191,7 +190,6 @@ export class LiveChatGateway
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
     const banKey = `live-ban-${room}`;
-    console.log('banKey', banKey);
     const redis = this.redisService.getClient();
     await redis.sadd(banKey, banUserIdx);
 
@@ -281,6 +279,7 @@ function getCurrentDateTimeString() {
   const seconds = String(currentDate.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
 async function userOut(roomIdx: string, userIdx: number, redis, rooms) {
   //레디스 유저 목록에서 삭제 및 방에서 데이터 삭제 처리
   const roomName = `live-chat-${roomIdx}`;

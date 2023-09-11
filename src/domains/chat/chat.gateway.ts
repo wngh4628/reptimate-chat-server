@@ -16,7 +16,9 @@ import { ChatConversation } from './entities/chat-conversation.entity';
 import { chat, chatType } from './helpers/constants';
 import { DataSource } from 'typeorm';
 import { ChatRoom } from './entities/chat-room.entity';
-import { ChatMember } from './entities/chat-member.entity';
+import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
+import { FCMService } from 'src/utils/fcm.service';
+import { UserService } from '../user/user.service';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -31,9 +33,12 @@ export class EventsGateway
     private readonly redisService: RedisService,
     private chatConversationRepository: ChatConversationRepository,
     private dataSource: DataSource,
+    private fbTokenRepository: FbTokenRepository,
+    private fCMService: FCMService,
+    private userService: UserService,
   ) {}
   private logger = new Logger('Chat Gateway');
-  private rooms = new Map<string, Map<number, string>>();
+  private rooms = new Map<string, Map<number, Socket>>();
 
   @WebSocketServer() nsp: Namespace;
   afterInit() {
@@ -77,7 +82,13 @@ export class EventsGateway
   @SubscribeMessage('message')
   async handleMessage(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() message: { userIdx: number; message: string; room: string },
+    @MessageBody()
+    message: {
+      userIdx: number;
+      oppositeIdx: number;
+      message: string;
+      room: string;
+    },
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -114,12 +125,32 @@ export class EventsGateway
       const redis = this.redisService.getClient();
       await redis.zadd(key, score, JSON.stringify(jsonMessage));
       //4. 발송
-      Array.from(
-        (
-          this.nsp.adapter.rooms.get(message.room) || new Set<string>()
-        ).values(),
-      );
       this.nsp.to(message.room).emit('message', jsonMessage);
+      //5. 상대방이 현재 방에 존재하는지 확인하고 노티피케이션 발송
+      const socketIdsInRoom = Array.from(
+        this.nsp.adapter.rooms.get(message.room) || [],
+      );
+      const otherUserIds = socketIdsInRoom.filter(
+        (socketId) => socketId !== socket.id,
+      );
+      const otherUsersExist = otherUserIds.length > 0;
+      if (otherUsersExist === false) {
+        const results = await this.fbTokenRepository.find({
+          where: {
+            userIdx: message.oppositeIdx,
+          },
+        });
+        for (const data of results) {
+          const userInfo = this.userService.getUserDetailInfo(
+            message.oppositeIdx,
+          );
+          this.fCMService.sendFCM(
+            data.fbToken,
+            (await userInfo).nickname,
+            message.message,
+          );
+        }
+      }
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -134,7 +165,6 @@ export class EventsGateway
     @MessageBody()
     message: {
       userIdx: number;
-      socketId: string;
       message: string;
       room: string;
     },
@@ -143,21 +173,18 @@ export class EventsGateway
     this.logger.log(
       `Socket ${message.userIdx}이(가) 방 ${message.room}에 참여하였습니다.`,
     );
-    const { room, userIdx, socketId } = message;
+    const { room, userIdx } = message;
 
     if (this.rooms.has(room)) {
       const userMap = this.rooms.get(room);
       if (userMap) {
-        userMap.set(userIdx, socketId);
+        userMap.set(userIdx, socket);
       }
     } else {
-      const userMap = new Map<number, string>();
-      userMap.set(userIdx, socketId);
+      const userMap = new Map<number, Socket>();
+      userMap.set(userIdx, socket);
       this.rooms.set(room, userMap);
     }
-    Array.from(
-      (this.nsp.adapter.rooms.get(message.room) || new Set<string>()).values(),
-    );
     console.log('this.rooms', this.rooms);
   }
   @SubscribeMessage('removeMessage')
@@ -170,7 +197,6 @@ export class EventsGateway
       room: string;
     },
   ) {
-    console.log(message);
     socket.join(message.room);
     //1. 마리아DB 삭제 처리
     const getMessage = await this.chatConversationRepository.findOne({
@@ -222,15 +248,4 @@ function getCurrentDateTimeString() {
   const seconds = String(currentDate.getSeconds()).padStart(2, '0');
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-function findKeyByValue(
-  map: Map<number, string>,
-  searchValue: string,
-): number | undefined {
-  for (const [key, value] of map.entries()) {
-    if (value === searchValue) {
-      return key;
-    }
-  }
-  return undefined; // Return undefined if the value is not found in the map
 }

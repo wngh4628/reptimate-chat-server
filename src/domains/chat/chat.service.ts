@@ -65,7 +65,6 @@ export class ChatService {
     roomIdx: number,
     userIdx: number,
   ): Promise<YourChatMessageType[]> {
-    //Promise<YourChatMessageType[]>
     const queryRunner = this.dataSource.createQueryRunner();
     try {
       await queryRunner.connect();
