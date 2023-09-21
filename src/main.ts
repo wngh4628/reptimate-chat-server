@@ -24,10 +24,14 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   // cors 설정
-  app.enableCors();
+  app.enableCors({
+    origin: '*', // 모든 origin에서 접근 허용 (실제 프로덕션 환경에서는 '*' 대신 특정 origin을 명시)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // 허용할 HTTP 메서드
+    credentials: true, // 인증 정보 전달 여부 (옵션)
+  });
 
   // setNestApp(app);
 
-  await app.listen(3003);
+  await app.listen(3000);
 }
 bootstrap();

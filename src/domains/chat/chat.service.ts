@@ -5,11 +5,12 @@ import { ChatRoomDto, CreateRoomDto } from './dtos/chat-room.dto';
 import { DataSource, Not, Raw } from 'typeorm';
 import { ChatRoom } from './entities/chat-room.entity';
 import { ChatMember } from './entities/chat-member.entity';
-import { PageRequest } from 'src/core/page';
+import { Page, PageRequest } from 'src/core/page';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import { ChatConversation } from './entities/chat-conversation.entity';
 import { chat, chatType } from './helpers/constants';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
+import { UserRepository } from '../user/repositories/user.repository';
 interface YourChatMessageType {
   userIdx: number;
   action: string;
@@ -21,6 +22,7 @@ export class ChatService {
     private chatMemberRepository: ChatMemberRepository,
     private dataSource: DataSource,
     private readonly redisService: RedisService,
+    private userRepository: UserRepository,
   ) {}
   async findChatRoom(userIdx: number, oppositeIdx: number) {
     const result = await this.chatMemberRepository.findOne({
@@ -60,6 +62,28 @@ export class ChatService {
       await queryRunner.release();
     }
   }
+  async getChaRoomList(
+    pageRequest: PageRequest,
+    userIdx: number,
+  ): Promise<Page<ChatMember>> {
+    const [datas, totalCount] =
+      await this.chatMemberRepository.findAndCountByUserIdx(
+        pageRequest,
+        userIdx,
+      );
+    const chatRoomInfoArr = [];
+    for (const chatInfo of datas) {
+      const userDetails = await this.findUserInfo(chatInfo.oppositeIdx);
+      chatInfo.UserInfo = userDetails;
+      chatRoomInfoArr.push(chatInfo);
+    }
+    const result = new Page<ChatMember>(
+      totalCount,
+      chatRoomInfoArr,
+      pageRequest,
+    );
+    return result;
+  }
   async getChatData(
     pageRequest: PageRequest,
     roomIdx: number,
@@ -81,7 +105,6 @@ export class ChatService {
       }
       let roomOutScore = 0;
       if (chatMumberInfo.roomOut !== null) {
-        console.log('dfasfd');
         roomOutScore = new Date(chatMumberInfo.roomOut).getTime();
       }
       //1. 마리아DB 읽음 처리
@@ -229,4 +252,17 @@ export class ChatService {
     await this.chatMemberRepository.save(result);
     return result.chatRoomIdx;
   }
+  findUserInfo = async (result) => {
+    const userInfo = await this.userRepository.findOne({
+      where: {
+        idx: result,
+      },
+    });
+    const userDetails = {
+      idx: userInfo.idx,
+      nickname: userInfo.nickname,
+      profilePath: userInfo.profilePath,
+    };
+    return userDetails;
+  };
 }

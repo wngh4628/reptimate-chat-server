@@ -44,7 +44,6 @@ export class AuctionChatcontroller {
     @AuthUser() user: User,
     @Body() dto: { auctionIdx: number; userIdx: number },
   ) {
-    console.log('auctionParticipation controller:', dto);
     const result = await this.chatService.auctionParticipation(
       dto.auctionIdx,
       dto.userIdx,

@@ -23,7 +23,10 @@ import { UserService } from '../user/user.service';
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: ['http://localhost:3001'],
+    origin: '*', // 모든 origin을 허용
+    methods: ['GET', 'POST'], // 요청 허용 메서드
+    allowedHeaders: ['Authorization'], // 요청 허용 헤더
+    credentials: true, // 자격 증명(인증) 정보 허용
   },
 })
 export class EventsGateway
@@ -120,6 +123,7 @@ export class EventsGateway
         message: message.message,
         action: 'send',
         datetime: getCurrentDateTimeString(),
+        score: score,
       };
       const key = `personal-chat${message.room}`;
       const redis = this.redisService.getClient();
@@ -151,6 +155,63 @@ export class EventsGateway
           );
         }
       }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+  @SubscribeMessage('messageRead')
+  async MessageRead(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody()
+    message: {
+      userIdx: number;
+      oppositeIdx: number;
+      score: string;
+      room: string;
+    },
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      //1. 해당 메시지 조회
+      const returnMessage = await queryRunner.manager.findOne(
+        ChatConversation,
+        {
+          where: { score: parseInt(message.score) },
+        },
+      );
+      if (!returnMessage) {
+        throw new Error(`해당 메시지가 없습니다.`);
+      }
+      returnMessage.action = 'read';
+      await returnMessage.save();
+      // 3. 레디스 저장
+      const key = `personal-chat${message.room}`;
+      const redis = this.redisService.getClient();
+      // await redis.zadd(key, score, JSON.stringify(jsonMessage));
+      const members = await redis.zrangebyscore(
+        key,
+        returnMessage.score,
+        returnMessage.score,
+      );
+      if (members && members.length > 0) {
+        const member = JSON.parse(members[0]); // JSON 문자열을 파싱하여 객체로 변환합니다.
+        member.action = 'read'; // action을 "read"로 변경합니다.
+        // 레디스에서 기존 멤버를 제거하고 수정된 멤버를 추가합니다.
+        await redis.zremrangebyscore(
+          key,
+          returnMessage.score,
+          returnMessage.score,
+        );
+        await redis.zadd(key, returnMessage.score, JSON.stringify(member));
+      }
+      //4. 발송
+      this.nsp.to(message.room).emit('afterRead', members);
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();

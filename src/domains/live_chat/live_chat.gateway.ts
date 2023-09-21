@@ -17,7 +17,10 @@ import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 @WebSocketGateway({
   namespace: 'LiveChat',
   cors: {
-    origin: ['http://localhost:3001'],
+    origin: '*', // 모든 origin을 허용
+    methods: ['GET', 'POST'], // 요청 허용 메서드
+    allowedHeaders: ['Authorization'], // 요청 허용 헤더
+    credentials: true, // 자격 증명(인증) 정보 허용
   },
 })
 export class LiveChatGateway
@@ -90,7 +93,6 @@ export class LiveChatGateway
     };
     await redis.zadd(key, score, JSON.stringify(jsonMessage));
     //2. 발송
-    console.log('room', this.rooms);
     this.nsp.to(message.room).emit('live_message', jsonMessage);
   }
   @SubscribeMessage('join-live')
@@ -117,7 +119,6 @@ export class LiveChatGateway
       socket.emit('ban-notification', {
         message: HttpErrorConstants.LIVEROOM_BAN,
       });
-      socket.disconnect();
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_BAN);
     }
     //방이 처음 만들어저면 새로 만들고 추가, 기존에 존재하면 해당 유저만 추가

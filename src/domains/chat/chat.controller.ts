@@ -66,6 +66,21 @@ export class Chatcontroller {
     return HttpResponse.ok(res, result);
   }
   @ApiOperation({
+    summary: '채팅 방 목록 조회',
+    description: '유저 인덱스로 방 목록을 조회합니다.',
+  })
+  @ApiOkPaginationResponseTemplate({ type: Number })
+  @UseAuthGuards()
+  @Get('list/')
+  async getChaRoomList(
+    @Res() res,
+    @AuthUser() user: User,
+    @Query() pageRequest: PageRequest,
+  ) {
+    const result = await this.chatService.getChaRoomList(pageRequest, user.idx);
+    return HttpResponse.ok(res, result);
+  }
+  @ApiOperation({
     summary: '채팅 내역 조회',
     description: '1:1 채팅방 첫 입장 시, 읽음 처리까지 같이 합니다.',
   })

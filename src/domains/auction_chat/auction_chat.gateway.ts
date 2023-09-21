@@ -25,7 +25,10 @@ import * as moment from 'moment'; // moment 라이브러리 import
 @WebSocketGateway({
   namespace: 'AuctionChat',
   cors: {
-    origin: ['http://localhost:3001'],
+    origin: '*', // 모든 origin을 허용
+    methods: ['GET', 'POST'], // 요청 허용 메서드
+    allowedHeaders: ['Authorization'], // 요청 허용 헤더
+    credentials: true, // 자격 증명(인증) 정보 허용
   },
 })
 export class AuctionChatGateway
