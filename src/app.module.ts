@@ -11,12 +11,13 @@ import { ChatModule } from './domains/chat/chat.module';
 import { AuctionChatModule } from './domains/auction_chat/auction_chat.module';
 import { LiveChaModule } from './domains/live_chat/live_chat.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod',
+      envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
     }),
     //todo: 설정파일 분리
     TypeOrmModule.forRoot({
@@ -31,6 +32,14 @@ import { ScheduleModule } from '@nestjs/schedule';
       logging: true,
       timezone: '+09:00',
       namingStrategy: new SnakeNamingStrategy(),
+    }),
+    RedisModule.forRoot({
+      readyLog: true,
+      config: {
+        host: process.env.REDIS_HOST,
+        port: 6379,
+        password: process.env.REDIS_PASSWORD
+      },
     }),
     UserModule,
     AuthModule,

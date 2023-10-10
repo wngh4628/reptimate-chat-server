@@ -18,13 +18,13 @@ import { BoardRepository } from '../live_chat/repositories/board.repository';
       FbTokenRepository,
       BoardRepository,
     ]),
-    RedisModule.forRoot({
-      readyLog: true,
-      config: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
+    // RedisModule.forRoot({
+    //   readyLog: true,
+    //   config: {
+    //     host: 'localhost',
+    //     port: 6379,
+    //   },
+    // }),
   ],
   providers: [AuctionChatGateway, AuctionChatService, FCMService],
   controllers: [AuctionChatcontroller],

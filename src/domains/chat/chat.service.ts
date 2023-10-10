@@ -23,7 +23,8 @@ export class ChatService {
     private dataSource: DataSource,
     private readonly redisService: RedisService,
     private userRepository: UserRepository,
-  ) {}
+  ) {
+  }
   async findChatRoom(userIdx: number, oppositeIdx: number) {
     const result = await this.chatMemberRepository.findOne({
       where: {

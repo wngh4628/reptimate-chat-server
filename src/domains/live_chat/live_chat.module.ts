@@ -9,13 +9,13 @@ import { UserRepository } from '../user/repositories/user.repository';
 @Module({
   imports: [
     TypeOrmExModule.forCustomRepository([BoardRepository, UserRepository]),
-    RedisModule.forRoot({
-      readyLog: true,
-      config: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
+    // RedisModule.forRoot({
+    //   readyLog: true,
+    //   config: {
+    //     host: 'localhost',
+    //     port: 6379,
+    //   },
+    // }),
   ],
   providers: [LiveChatGateway, LiveChatService],
   controllers: [LiveChatcontroller],
