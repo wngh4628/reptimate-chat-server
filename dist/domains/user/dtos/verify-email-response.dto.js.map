@@ -1,0 +1,1 @@
+{"version":3,"file":"verify-email-response.dto.js","sourceRoot":"","sources":["../../../../src/domains/user/dtos/verify-email-response.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAE9C,MAAa,sBAAsB;CAMlC;AALC;IAAC,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,WAAW;QACxB,OAAO,EAAE,0DAA0D;KACpE,CAAC;;iEACwB;AAL5B,wDAMC"}

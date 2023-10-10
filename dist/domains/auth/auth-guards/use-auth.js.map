@@ -1,0 +1,1 @@
+{"version":3,"file":"use-auth.js","sourceRoot":"","sources":["../../../../src/domains/auth/auth-guards/use-auth.ts"],"names":[],"mappings":";;AAAA,2CAA4D;AAC5D,6CAAgD;AAChD,+FAA0F;AAC1F,6CAAyC;AAEzC,MAAM,aAAa,GAAG,GAAG,EAAE;IACzB,OAAO,IAAA,wBAAe,EACpB,IAAA,kBAAS,EAAC,sBAAS,CAAC,EACpB,IAAA,uBAAa,EAAC,aAAa,CAAC,EAC5B,IAAA,wDAA4B,GAAE,CAC/B,CAAC;AACJ,CAAC,CAAC;AAEF,kBAAe,aAAa,CAAC"}

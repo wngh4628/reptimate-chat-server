@@ -18,7 +18,7 @@ env
 /env
 
 # build
-dist/
+# dist/
 package-lock.json
 
 # test code file
