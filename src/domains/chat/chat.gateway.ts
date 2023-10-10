@@ -43,27 +43,29 @@ export class EventsGateway
   private logger = new Logger('Chat Gateway');
   private rooms = new Map<string, Map<number, Socket>>();
 
-  @WebSocketServer() nsp: Namespace;
-  afterInit() {
-    this.nsp.adapter.on('create-room', (room) => {
+  @WebSocketServer()
+  nsp: Namespace;
+
+  afterInit(nsp) {
+    nsp.adapter.on('create-room', (room) => {
       this.logger.log(`"Room:${room}"이 생성되었습니다.`);
     });
 
-    this.nsp.adapter.on('join-room', (room, id) => {
+    nsp.adapter.on('join-room', (room, id) => {
       this.logger.log(`"Socket:${id}"이 "Room:${room}"에 참여하였습니다.`);
     });
 
-    this.nsp.adapter.on('leave-room', (room, id) => {
+    nsp.adapter.on('leave-room', (room, id) => {
       this.logger.log(`"Socket:${id}"이 "Room:${room}"에서 나갔습니다.`);
       // const userIdx = findKeyByValue(this.rooms.get(room), id);
       // this.rooms.get(room).delete(userIdx);
     });
 
-    this.nsp.adapter.on('delete-room', (roomName) => {
+    nsp.adapter.on('delete-room', (roomName) => {
       this.logger.log(`"Room:${roomName}"이 삭제되었습니다.`);
     });
 
-    this.nsp.adapter.on('message', (roomName) => {
+    nsp.adapter.on('message', (roomName) => {
       console.log(roomName);
     });
 

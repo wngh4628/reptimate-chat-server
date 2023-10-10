@@ -31,7 +31,7 @@ export class Chatcontroller {
 
   @ApiOperation({
     summary: '채팅방 생성',
-    description: '채팅방을 생성합니다.',
+    description: '채팅방을 생성합니다!',
   })
   @ApiErrorResponseTemplate([
     {
