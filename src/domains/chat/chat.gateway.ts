@@ -250,6 +250,8 @@ export class EventsGateway
     }
     console.log('this.rooms', this.rooms);
   }
+
+  
   @SubscribeMessage('removeMessage')
   async removeMessage(
     @ConnectedSocket() socket: Socket,

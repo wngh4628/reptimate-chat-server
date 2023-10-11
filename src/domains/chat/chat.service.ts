@@ -63,24 +63,26 @@ export class ChatService {
       await queryRunner.release();
     }
   }
-  async getChaRoomList(
+  async getChatRoomList(
     pageRequest: PageRequest,
     userIdx: number,
   ): Promise<Page<ChatMember>> {
+    // 1. 내가 속해있는 모든 채팅방들에 대한 정보를 불러온다 (방의 번호와, 그 방에 같이있는 상대방의 idx는 무엇인지 등)
     const [datas, totalCount] =
       await this.chatMemberRepository.findAndCountByUserIdx(
         pageRequest,
         userIdx,
       );
     const chatRoomInfoArr = [];
-    for (const chatInfo of datas) {
-      const userDetails = await this.findUserInfo(chatInfo.oppositeIdx);
-      chatInfo.UserInfo = userDetails;
-      chatRoomInfoArr.push(chatInfo);
+    // 2. 각 채팅방에, 속해있는 상대방의 정보를 담아준다
+    for (const chatRoomInfo of datas) {
+      const userDetails = await this.findUserInfo(chatRoomInfo.oppositeIdx);
+      chatRoomInfo.UserInfo = userDetails;
+      chatRoomInfoArr.push(chatRoomInfo);
     }
     const result = new Page<ChatMember>(
       totalCount,
-      chatRoomInfoArr,
+      chatRoomInfoArr, // 채팅방 정보 + 속해있는 상대방의 정보
       pageRequest,
     );
     return result;

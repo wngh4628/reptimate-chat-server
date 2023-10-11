@@ -8,7 +8,7 @@ export declare class Chatcontroller {
     constructor(chatService: ChatService);
     createBoard(res: any, dto: CreateRoomDto, user: User): Promise<import("express").Response<unknown, Record<string, any>>>;
     getRoomIdx(res: any, user: User, oppositeIdx: number): Promise<import("express").Response<unknown, Record<string, any>>>;
-    getChaRoomList(res: any, user: User, pageRequest: PageRequest): Promise<import("express").Response<unknown, Record<string, any>>>;
+    getChatRoomList(res: any, user: User, pageRequest: PageRequest): Promise<import("express").Response<unknown, Record<string, any>>>;
     getChatData(res: any, user: User, pageRequest: PageRequest, roomIdx: number): Promise<import("express").Response<unknown, Record<string, any>>>;
     chatBan(res: any, dto: ChatRoomDto, user: User): Promise<import("express").Response<unknown, Record<string, any>>>;
     chatRoomOut(res: any, roomIdx: number, user: User): Promise<import("express").Response<unknown, Record<string, any>>>;

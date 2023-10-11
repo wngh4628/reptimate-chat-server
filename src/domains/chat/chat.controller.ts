@@ -72,12 +72,12 @@ export class Chatcontroller {
   @ApiOkPaginationResponseTemplate({ type: Number })
   @UseAuthGuards()
   @Get('list/')
-  async getChaRoomList(
+  async getChatRoomList(
     @Res() res,
     @AuthUser() user: User,
     @Query() pageRequest: PageRequest,
   ) {
-    const result = await this.chatService.getChaRoomList(pageRequest, user.idx);
+    const result = await this.chatService.getChatRoomList(pageRequest, user.idx);
     return HttpResponse.ok(res, result);
   }
   @ApiOperation({

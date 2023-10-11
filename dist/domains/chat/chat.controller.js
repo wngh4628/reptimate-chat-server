@@ -40,8 +40,8 @@ let Chatcontroller = class Chatcontroller {
         const result = await this.chatService.findChatRoom(user.idx, oppositeIdx);
         return http_response_1.default.ok(res, result);
     }
-    async getChaRoomList(res, user, pageRequest) {
-        const result = await this.chatService.getChaRoomList(pageRequest, user.idx);
+    async getChatRoomList(res, user, pageRequest) {
+        const result = await this.chatService.getChatRoomList(pageRequest, user.idx);
         return http_response_1.default.ok(res, result);
     }
     async getChatData(res, user, pageRequest, roomIdx) {
@@ -109,7 +109,7 @@ __decorate([
     __metadata("design:paramtypes", [Object, user_entity_1.User,
         page_1.PageRequest]),
     __metadata("design:returntype", Promise)
-], Chatcontroller.prototype, "getChaRoomList", null);
+], Chatcontroller.prototype, "getChatRoomList", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '채팅 내역 조회',

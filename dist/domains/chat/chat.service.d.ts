@@ -19,7 +19,7 @@ export declare class ChatService {
     constructor(chatMemberRepository: ChatMemberRepository, dataSource: DataSource, redisService: RedisService, userRepository: UserRepository);
     findChatRoom(userIdx: number, oppositeIdx: number): Promise<number>;
     createRoom(dto: CreateRoomDto, userIdx: number): Promise<ChatRoom>;
-    getChaRoomList(pageRequest: PageRequest, userIdx: number): Promise<Page<ChatMember>>;
+    getChatRoomList(pageRequest: PageRequest, userIdx: number): Promise<Page<ChatMember>>;
     getChatData(pageRequest: PageRequest, roomIdx: number, userIdx: number): Promise<YourChatMessageType[]>;
     chatBan(dto: ChatRoomDto, userIdx: number): Promise<number>;
     chatRoomOut(roomIdx: number, userIdx: number): Promise<number>;

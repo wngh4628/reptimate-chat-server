@@ -72,13 +72,13 @@ let ChatService = class ChatService {
             await queryRunner.release();
         }
     }
-    async getChaRoomList(pageRequest, userIdx) {
+    async getChatRoomList(pageRequest, userIdx) {
         const [datas, totalCount] = await this.chatMemberRepository.findAndCountByUserIdx(pageRequest, userIdx);
         const chatRoomInfoArr = [];
-        for (const chatInfo of datas) {
-            const userDetails = await this.findUserInfo(chatInfo.oppositeIdx);
-            chatInfo.UserInfo = userDetails;
-            chatRoomInfoArr.push(chatInfo);
+        for (const chatRoomInfo of datas) {
+            const userDetails = await this.findUserInfo(chatRoomInfo.oppositeIdx);
+            chatRoomInfo.UserInfo = userDetails;
+            chatRoomInfoArr.push(chatRoomInfo);
         }
         const result = new page_1.Page(totalCount, chatRoomInfoArr, pageRequest);
         return result;
