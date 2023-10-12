@@ -21,12 +21,14 @@ const chat_conversation_entity_1 = require("./entities/chat-conversation.entity"
 const constants_1 = require("./helpers/constants");
 const http_error_objects_1 = require("../../core/http/http-error-objects");
 const user_repository_1 = require("../user/repositories/user.repository");
+const chat_conversation_repository_1 = require("./repositories/chat-conversation.repository");
 let ChatService = class ChatService {
-    constructor(chatMemberRepository, dataSource, redisService, userRepository) {
+    constructor(chatMemberRepository, dataSource, redisService, userRepository, chatConversationRepository) {
         this.chatMemberRepository = chatMemberRepository;
         this.dataSource = dataSource;
         this.redisService = redisService;
         this.userRepository = userRepository;
+        this.chatConversationRepository = chatConversationRepository;
         this.findUserInfo = async (result) => {
             const userInfo = await this.userRepository.findOne({
                 where: {
@@ -78,6 +80,8 @@ let ChatService = class ChatService {
         for (const chatRoomInfo of datas) {
             const userDetails = await this.findUserInfo(chatRoomInfo.oppositeIdx);
             chatRoomInfo.UserInfo = userDetails;
+            const unreadCount = await this.chatConversationRepository.getUnreadCount(chatRoomInfo.chatRoomIdx, chatRoomInfo.oppositeIdx);
+            chatRoomInfo.unreadCount = unreadCount;
             chatRoomInfoArr.push(chatRoomInfo);
         }
         const result = new page_1.Page(totalCount, chatRoomInfoArr, pageRequest);
@@ -218,7 +222,8 @@ ChatService = __decorate([
     __metadata("design:paramtypes", [chat_member_repository_1.ChatMemberRepository,
         typeorm_1.DataSource,
         nestjs_redis_1.RedisService,
-        user_repository_1.UserRepository])
+        user_repository_1.UserRepository,
+        chat_conversation_repository_1.ChatConversationRepository])
 ], ChatService);
 exports.ChatService = ChatService;
 //# sourceMappingURL=chat.service.js.map

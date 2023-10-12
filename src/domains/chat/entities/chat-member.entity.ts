@@ -31,4 +31,6 @@ export class ChatMember extends BaseEntity {
   }
 
   UserInfo: { idx: number; nickname: string; profilePath: string };
+
+  unreadCount: number;
 }

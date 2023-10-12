@@ -6,6 +6,7 @@ import { ChatMember } from './entities/chat-member.entity';
 import { Page, PageRequest } from 'src/core/page';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import { UserRepository } from '../user/repositories/user.repository';
+import { ChatConversationRepository } from './repositories/chat-conversation.repository';
 interface YourChatMessageType {
     userIdx: number;
     action: string;
@@ -16,7 +17,8 @@ export declare class ChatService {
     private dataSource;
     private readonly redisService;
     private userRepository;
-    constructor(chatMemberRepository: ChatMemberRepository, dataSource: DataSource, redisService: RedisService, userRepository: UserRepository);
+    private chatConversationRepository;
+    constructor(chatMemberRepository: ChatMemberRepository, dataSource: DataSource, redisService: RedisService, userRepository: UserRepository, chatConversationRepository: ChatConversationRepository);
     findChatRoom(userIdx: number, oppositeIdx: number): Promise<number>;
     createRoom(dto: CreateRoomDto, userIdx: number): Promise<ChatRoom>;
     getChatRoomList(pageRequest: PageRequest, userIdx: number): Promise<Page<ChatMember>>;

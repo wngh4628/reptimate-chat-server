@@ -10,6 +10,7 @@ import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository'
 import { FCMService } from 'src/utils/fcm.service';
 import { UserService } from '../user/user.service';
 import { UserRepository } from '../user/repositories/user.repository';
+import { ChatRoomRepository } from './repositories/chat-room.repository';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { UserRepository } from '../user/repositories/user.repository';
       ChatConversationRepository,
       FbTokenRepository,
       UserRepository,
-    ]),
+    ]), 
   ],
   providers: [EventsGateway, ChatService, FCMService, UserService], // DynamoDBService를 providers 배열에 추가합니다.
   controllers: [Chatcontroller],

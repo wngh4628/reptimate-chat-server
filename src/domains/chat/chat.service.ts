@@ -11,6 +11,7 @@ import { ChatConversation } from './entities/chat-conversation.entity';
 import { chat, chatType } from './helpers/constants';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
 import { UserRepository } from '../user/repositories/user.repository';
+import { ChatConversationRepository } from './repositories/chat-conversation.repository';
 interface YourChatMessageType {
   userIdx: number;
   action: string;
@@ -23,6 +24,7 @@ export class ChatService {
     private dataSource: DataSource,
     private readonly redisService: RedisService,
     private userRepository: UserRepository,
+    private chatConversationRepository: ChatConversationRepository,
   ) {
   }
   async findChatRoom(userIdx: number, oppositeIdx: number) {
@@ -74,17 +76,26 @@ export class ChatService {
         userIdx,
       );
     const chatRoomInfoArr = [];
-    // 2. 각 채팅방에, 속해있는 상대방의 정보를 담아준다
+    
     for (const chatRoomInfo of datas) {
+      // 2. 채팅방별 속해있는 상대방의 정보를 불러와서 담아준다
       const userDetails = await this.findUserInfo(chatRoomInfo.oppositeIdx);
       chatRoomInfo.UserInfo = userDetails;
+      
+      // 3. 채팅방별 안읽은 채팅의 개수를 불러와서 담아준다
+      const unreadCount = await this.chatConversationRepository.getUnreadCount(chatRoomInfo.chatRoomIdx, chatRoomInfo.oppositeIdx)
+      chatRoomInfo.unreadCount = unreadCount
+
+      // 4. 2,3번의 정보가 추가된 채팅방정보 객체를 새로운 배열(응답용)에 담아준다
       chatRoomInfoArr.push(chatRoomInfo);
     }
+
     const result = new Page<ChatMember>(
       totalCount,
       chatRoomInfoArr, // 채팅방 정보 + 속해있는 상대방의 정보
       pageRequest,
     );
+
     return result;
   }
   async getChatData(

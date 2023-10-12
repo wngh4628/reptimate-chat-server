@@ -11,6 +11,15 @@ const typeorm_1 = require("typeorm");
 const typeorm_ex_decorator_1 = require("../../../core/decorators/typeorm-ex.decorator");
 const chat_conversation_entity_1 = require("../entities/chat-conversation.entity");
 let ChatConversationRepository = class ChatConversationRepository extends typeorm_1.Repository {
+    async getUnreadCount(roomIdx, oppositeIdx) {
+        const action = 'send';
+        const totalCount = await this.createQueryBuilder('chatConversation')
+            .where('chatConversation.userIdx = :oppositeIdx', { oppositeIdx })
+            .andWhere('chatConversation.roomIdx = :roomIdx', { roomIdx })
+            .andWhere('chatConversation.action = :action', { action })
+            .getCount();
+        return totalCount;
+    }
 };
 ChatConversationRepository = __decorate([
     (0, typeorm_ex_decorator_1.CustomRepository)(chat_conversation_entity_1.ChatConversation)

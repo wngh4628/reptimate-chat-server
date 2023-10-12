@@ -9,4 +9,5 @@ export class ChatRoom extends BaseEntity {
   @OneToOne(() => ChatMember)
   @JoinColumn({ name: 'idx', referencedColumnName: 'chatRoomIdx' }) // postIdx와 idx를 일치시킴
   chatMember: ChatMember;
+  
 }
