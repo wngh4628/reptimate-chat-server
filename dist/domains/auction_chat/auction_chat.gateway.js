@@ -105,21 +105,7 @@ let AuctionChatGateway = class AuctionChatGateway {
                     auctionIdx: parseInt(room),
                 },
             });
-            const roomName = `auction-chat-${room}`;
-            const userSocketsMap = this.rooms.get(roomName);
-            if (!userSocketsMap) {
-                throw new common_1.NotFoundException(http_error_objects_1.HttpErrorConstants.CHATROOM_NOT_EXIST);
-            }
-            for (const [userIdx, socket] of userSocketsMap) {
-                for (const data of alertList) {
-                    if (data.userIdx === userIdx) {
-                        alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
-                    }
-                    else {
-                        socket.emit('Auction_message', Data);
-                    }
-                }
-            }
+            this.nsp.to(message.room).emit('Auction_message', Data);
             for (const data of alertList) {
                 const results = await this.fbTokenRepository.find({
                     where: {

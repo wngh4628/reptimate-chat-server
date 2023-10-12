@@ -157,20 +157,23 @@ export class AuctionChatGateway
       });
 
       //9. 채팅방(경매방)에 있는 유저들에게 발송
-      const roomName = `auction-chat-${room}`;
-      const userSocketsMap = this.rooms.get(roomName);
-      if (!userSocketsMap) {
-        throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
-      }
-      for (const [userIdx, socket] of userSocketsMap) {
-        for (const data of alertList) {
-          if (data.userIdx === userIdx) {
-            alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
-          } else {
-            socket.emit('Auction_message', Data);
-          }
-        }
-      }
+      
+      this.nsp.to(message.room).emit('Auction_message', Data);
+
+      // const roomName = `auction-chat-${room}`;
+      // const userSocketsMap = this.rooms.get(roomName);
+      // if (!userSocketsMap) {
+      //   throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
+      // }
+      // for (const [userIdx, socket] of userSocketsMap) {
+      //   for (const data of alertList) {
+      //     if (data.userIdx === userIdx) {
+      //       alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
+      //     } else {
+      //       socket.emit('Auction_message', Data);
+      //     }
+      //   }
+      // }
 
       //10. 채팅방(경매방)에 있는 유저를 제외한 나머지 노티피케이션 발송
       for (const data of alertList) {
