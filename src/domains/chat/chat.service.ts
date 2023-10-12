@@ -97,20 +97,21 @@ export class ChatService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       //방 정보 조회
-      const chatMumberInfo = await queryRunner.manager.findOne(ChatMember, {
+      const chatMemberInfo = await queryRunner.manager.findOne(ChatMember, {
         where: {
           userIdx: userIdx,
           chatRoomIdx: roomIdx,
         },
       });
-      if (!chatMumberInfo) {
+      if (!chatMemberInfo) {
         throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
       }
       let roomOutScore = 0;
-      if (chatMumberInfo.roomOut !== null) {
-        roomOutScore = new Date(chatMumberInfo.roomOut).getTime();
+      if (chatMemberInfo.roomOut !== null) {
+        roomOutScore = new Date(chatMemberInfo.roomOut).getTime();
       }
       //1. 마리아DB 읽음 처리
+        // 1-1. 상대방이 보낸 채팅중 안읽은 채팅만 불러온다
       const chatConversations = await queryRunner.manager.find(
         ChatConversation,
         {
@@ -122,6 +123,7 @@ export class ChatService {
           },
         },
       );
+        // 1-2. '안읽음 -> 읽음'으로 상태를 변경한다.
       for (const conversation of chatConversations) {
         conversation.action = 'read';
         await queryRunner.manager.save(conversation);
@@ -148,7 +150,7 @@ export class ChatService {
           }
         }
       }
-      //3. 게시글에 대한 정보를 레디스에서 불러온다.
+      //3. 채팅에 대한 정보를 레디스에서 불러온다.
       const getData = await redis.zrevrange(
         key,
         (pageRequest.page - 1) * pageRequest.size,
@@ -167,7 +169,7 @@ export class ChatService {
           result.push(data);
         }
       }
-      //4. 레디스에 저장된 데이터 수가 20개 미만이면, 마리아DB에서 조회해온다.
+      //4. 레디스에 저장된 데이터 수가 20개 미만이면, 나머지는 마리아DB에서 조회해온다.
       if (result.length < pageRequest.size) {
         const skip = (pageRequest.page - 1) * pageRequest.size + result.length;
         const limit = pageRequest.size - result.length;

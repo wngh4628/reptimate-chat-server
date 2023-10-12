@@ -9,6 +9,7 @@ import { AuctionAlertRepository } from './repositories/auction-alert.repository'
 import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
 import { FCMService } from 'src/utils/fcm.service';
 import { BoardRepository } from '../live_chat/repositories/board.repository';
+import { BoardAuctionRepository } from './repositories/board-auction.repository';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BoardRepository } from '../live_chat/repositories/board.repository';
       AuctionAlertRepository,
       FbTokenRepository,
       BoardRepository,
+      BoardAuctionRepository
     ]),
     // RedisModule.forRoot({
     //   readyLog: true,

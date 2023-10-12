@@ -17,6 +17,7 @@ const auction_alert_repository_1 = require("./repositories/auction-alert.reposit
 const user_fbtoken_repository_1 = require("../user/repositories/user.fbtoken.repository");
 const fcm_service_1 = require("../../utils/fcm.service");
 const board_repository_1 = require("../live_chat/repositories/board.repository");
+const board_auction_repository_1 = require("./repositories/board-auction.repository");
 let AuctionChatModule = class AuctionChatModule {
 };
 AuctionChatModule = __decorate([
@@ -27,6 +28,7 @@ AuctionChatModule = __decorate([
                 auction_alert_repository_1.AuctionAlertRepository,
                 user_fbtoken_repository_1.FbTokenRepository,
                 board_repository_1.BoardRepository,
+                board_auction_repository_1.BoardAuctionRepository
             ]),
         ],
         providers: [auction_chat_gateway_1.AuctionChatGateway, auction_chat_service_1.AuctionChatService, fcm_service_1.FCMService],

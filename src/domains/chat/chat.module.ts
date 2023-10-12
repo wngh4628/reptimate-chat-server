@@ -19,13 +19,6 @@ import { UserRepository } from '../user/repositories/user.repository';
       FbTokenRepository,
       UserRepository,
     ]),
-    // RedisModule.forRoot({
-    //   readyLog: true,
-    //   config: {
-    //     host: 'localhost',
-    //     port: 6379,
-    //   },
-    // }),
   ],
   providers: [EventsGateway, ChatService, FCMService, UserService], // DynamoDBService를 providers 배열에 추가합니다.
   controllers: [Chatcontroller],

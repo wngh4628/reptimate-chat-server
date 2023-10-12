@@ -47,6 +47,7 @@ export class EventsGateway
   nsp: Namespace;
 
   afterInit(nsp) {
+
     nsp.adapter.on('create-room', (room) => {
       this.logger.log(`"Room:${room}"이 생성되었습니다.`);
     });
@@ -70,6 +71,7 @@ export class EventsGateway
     });
 
     this.logger.log('웹소켓 서버 초기화 ✅');
+    
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
@@ -100,6 +102,7 @@ export class EventsGateway
     await queryRunner.startTransaction();
     try {
       const score = Date.now();
+
       //1.대화 내역 저장
       const Data = ChatConversation.from(
         chatType.PERSONAL,
@@ -171,7 +174,7 @@ export class EventsGateway
     @MessageBody()
     message: {
       userIdx: number;
-      oppositeIdx: number;
+      // oppositeIdx: number;
       score: string;
       room: string;
     },
@@ -180,7 +183,7 @@ export class EventsGateway
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      //1. 해당 메시지 조회
+      //1. rds에서 채팅상태를 '안읽음 -> 읽음'으로 변경
       const returnMessage = await queryRunner.manager.findOne(
         ChatConversation,
         {
@@ -201,6 +204,7 @@ export class EventsGateway
         returnMessage.score,
         returnMessage.score,
       );
+      
       if (members && members.length > 0) {
         const member = JSON.parse(members[0]); // JSON 문자열을 파싱하여 객체로 변환합니다.
         member.action = 'read'; // action을 "read"로 변경합니다.
@@ -228,7 +232,7 @@ export class EventsGateway
     @MessageBody()
     message: {
       userIdx: number;
-      message: string;
+      message: string; // 클라이언트에서 해당 파라미터 전달 안한다고 하면 지우기
       room: string;
     },
   ) {
@@ -236,19 +240,19 @@ export class EventsGateway
     this.logger.log(
       `Socket ${message.userIdx}이(가) 방 ${message.room}에 참여하였습니다.`,
     );
-    const { room, userIdx } = message;
+    // const { room, userIdx } = message;
 
-    if (this.rooms.has(room)) {
-      const userMap = this.rooms.get(room);
-      if (userMap) {
-        userMap.set(userIdx, socket);
-      }
-    } else {
-      const userMap = new Map<number, Socket>();
-      userMap.set(userIdx, socket);
-      this.rooms.set(room, userMap);
-    }
-    console.log('this.rooms', this.rooms);
+    // if (this.rooms.has(room)) {
+    //   const userMap = this.rooms.get(room);
+    //   if (userMap) {
+    //     userMap.set(userIdx, socket);
+    //   }
+    // } else {
+    //   const userMap = new Map<number, Socket>();
+    //   userMap.set(userIdx, socket);
+    //   this.rooms.set(room, userMap);
+    // }
+    // console.log('this.rooms', this.rooms);
   }
 
   
@@ -262,7 +266,7 @@ export class EventsGateway
       room: string;
     },
   ) {
-    socket.join(message.room);
+    // socket.join(message.room);
     //1. 마리아DB 삭제 처리
     const getMessage = await this.chatConversationRepository.findOne({
       where: {
@@ -296,9 +300,9 @@ export class EventsGateway
     await redisClient.zremrangebyscore(key, message.score, message.score);
     await redisClient.zadd(key, message.score, JSON.stringify(result));
     //3. 삭제된 데이터 전송
-    Array.from(
-      (this.nsp.adapter.rooms.get(message.room) || new Set<string>()).values(),
-    );
+    // Array.from(
+    //   (this.nsp.adapter.rooms.get(message.room) || new Set<string>()).values(),
+    // );
     this.nsp.to(message.room).emit('removeMessage', result);
   }
 }

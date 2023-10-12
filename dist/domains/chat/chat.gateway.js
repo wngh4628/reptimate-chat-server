@@ -151,22 +151,8 @@ let EventsGateway = class EventsGateway {
     handleJoinRoom(socket, message) {
         socket.join(message.room);
         this.logger.log(`Socket ${message.userIdx}이(가) 방 ${message.room}에 참여하였습니다.`);
-        const { room, userIdx } = message;
-        if (this.rooms.has(room)) {
-            const userMap = this.rooms.get(room);
-            if (userMap) {
-                userMap.set(userIdx, socket);
-            }
-        }
-        else {
-            const userMap = new Map();
-            userMap.set(userIdx, socket);
-            this.rooms.set(room, userMap);
-        }
-        console.log('this.rooms', this.rooms);
     }
     async removeMessage(socket, message) {
-        socket.join(message.room);
         const getMessage = await this.chatConversationRepository.findOne({
             where: {
                 score: message.score,
@@ -190,7 +176,6 @@ let EventsGateway = class EventsGateway {
         result.message = constants_1.chat.DELETE;
         await redisClient.zremrangebyscore(key, message.score, message.score);
         await redisClient.zadd(key, message.score, JSON.stringify(result));
-        Array.from((this.nsp.adapter.rooms.get(message.room) || new Set()).values());
         this.nsp.to(message.room).emit('removeMessage', result);
     }
 };

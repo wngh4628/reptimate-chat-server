@@ -28,7 +28,6 @@ export declare class EventsGateway implements OnGatewayInit, OnGatewayConnection
     }): Promise<void>;
     MessageRead(socket: Socket, message: {
         userIdx: number;
-        oppositeIdx: number;
         score: string;
         room: string;
     }): Promise<void>;

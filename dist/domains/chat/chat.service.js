@@ -88,18 +88,18 @@ let ChatService = class ChatService {
         try {
             await queryRunner.connect();
             await queryRunner.startTransaction();
-            const chatMumberInfo = await queryRunner.manager.findOne(chat_member_entity_1.ChatMember, {
+            const chatMemberInfo = await queryRunner.manager.findOne(chat_member_entity_1.ChatMember, {
                 where: {
                     userIdx: userIdx,
                     chatRoomIdx: roomIdx,
                 },
             });
-            if (!chatMumberInfo) {
+            if (!chatMemberInfo) {
                 throw new common_1.NotFoundException(http_error_objects_1.HttpErrorConstants.CHATROOM_NOT_EXIST);
             }
             let roomOutScore = 0;
-            if (chatMumberInfo.roomOut !== null) {
-                roomOutScore = new Date(chatMumberInfo.roomOut).getTime();
+            if (chatMemberInfo.roomOut !== null) {
+                roomOutScore = new Date(chatMemberInfo.roomOut).getTime();
             }
             const chatConversations = await queryRunner.manager.find(chat_conversation_entity_1.ChatConversation, {
                 where: {

@@ -21,6 +21,7 @@ import { FCMService } from 'src/utils/fcm.service';
 import { BoardAuction } from './entities/board-auction.entity';
 import { ScheduleRepository } from './repositories/schedule.repository';
 import * as moment from 'moment'; // moment 라이브러리 import
+import { BoardAuctionRepository } from './repositories/board-auction.repository';
 
 @WebSocketGateway({
   namespace: 'AuctionChat',
@@ -40,7 +41,8 @@ export class AuctionChatGateway
     private auctionAlertRepository: AuctionAlertRepository,
     private fbTokenRepository: FbTokenRepository,
     private fCMService: FCMService,
-    private scheduleRepository: ScheduleRepository,
+    // private scheduleRepository: ScheduleRepository,
+    private boardAuctionRepository:BoardAuctionRepository
   ) {}
   private logger = new Logger('Chat Gateway');
   public rooms = new Map<string, Map<number, Socket>>();
@@ -232,7 +234,7 @@ export class AuctionChatGateway
       room: string;
     },
   ) {
-    const jsonMessage = {
+    const jsonMessage = { 
       userIdx: message.userIdx,
       profilePath: message.profilePath,
       nickname: message.nickname,
@@ -244,9 +246,9 @@ export class AuctionChatGateway
     const redis = this.redisService.getClient();
     const auctionInfo = await redis.get(`acutionInfo-${room}`);
     if (!auctionInfo) {
-      const result = await this.scheduleRepository.findOne({
+      const result = await this.boardAuctionRepository.findOne({
         where: {
-          idx: parseInt(room),
+          boardIdx: parseInt(room),
         },
       });
       const data = JSON.stringify(result);

@@ -25,16 +25,16 @@ const auction_alert_repository_1 = require("./repositories/auction-alert.reposit
 const user_fbtoken_repository_1 = require("../user/repositories/user.fbtoken.repository");
 const fcm_service_1 = require("../../utils/fcm.service");
 const board_auction_entity_1 = require("./entities/board-auction.entity");
-const schedule_repository_1 = require("./repositories/schedule.repository");
 const moment = require("moment");
+const board_auction_repository_1 = require("./repositories/board-auction.repository");
 let AuctionChatGateway = class AuctionChatGateway {
-    constructor(redisService, dataSource, auctionAlertRepository, fbTokenRepository, fCMService, scheduleRepository) {
+    constructor(redisService, dataSource, auctionAlertRepository, fbTokenRepository, fCMService, boardAuctionRepository) {
         this.redisService = redisService;
         this.dataSource = dataSource;
         this.auctionAlertRepository = auctionAlertRepository;
         this.fbTokenRepository = fbTokenRepository;
         this.fCMService = fCMService;
-        this.scheduleRepository = scheduleRepository;
+        this.boardAuctionRepository = boardAuctionRepository;
         this.logger = new common_1.Logger('Chat Gateway');
         this.rooms = new Map();
     }
@@ -169,9 +169,9 @@ let AuctionChatGateway = class AuctionChatGateway {
         const redis = this.redisService.getClient();
         const auctionInfo = await redis.get(`acutionInfo-${room}`);
         if (!auctionInfo) {
-            const result = await this.scheduleRepository.findOne({
+            const result = await this.boardAuctionRepository.findOne({
                 where: {
-                    idx: parseInt(room),
+                    boardIdx: parseInt(room),
                 },
             });
             const data = JSON.stringify(result);
@@ -240,7 +240,7 @@ AuctionChatGateway = __decorate([
         auction_alert_repository_1.AuctionAlertRepository,
         user_fbtoken_repository_1.FbTokenRepository,
         fcm_service_1.FCMService,
-        schedule_repository_1.ScheduleRepository])
+        board_auction_repository_1.BoardAuctionRepository])
 ], AuctionChatGateway);
 exports.AuctionChatGateway = AuctionChatGateway;
 function getCurrentDateTimeString() {
