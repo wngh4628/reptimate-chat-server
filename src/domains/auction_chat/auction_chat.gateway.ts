@@ -156,24 +156,27 @@ export class AuctionChatGateway
         },
       });
 
-      //9. 채팅방(경매방)에 있는 유저들에게 발송
-      
+      //9. 채팅방(경매방)에 있는 유저들에게 메시지 발송
       this.nsp.to(message.room).emit('Auction_message', Data);
 
-      // const roomName = `auction-chat-${room}`;
-      // const userSocketsMap = this.rooms.get(roomName);
-      // if (!userSocketsMap) {
-      //   throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
-      // }
-      // for (const [userIdx, socket] of userSocketsMap) {
-      //   for (const data of alertList) {
-      //     if (data.userIdx === userIdx) {
-      //       alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
-      //     } else {
-      //       socket.emit('Auction_message', Data);
-      //     }
-      //   }
-      // }
+      // 9-1. 채팅방에 입장했던 유저들중에서 알림발송대상 필터링 (알림발송대상: 알림을 받겠다고 한 유저중에서 채팅방에 없는 유저들)
+      const roomName = `auction-chat-${room}`;
+      const userSocketsMap = this.rooms.get(roomName);
+      if (!userSocketsMap) {
+        throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
+      }
+      for (const [userIdx, socket] of userSocketsMap) {
+        // 해당 (경매)게시글에 알람을 설정한 사람들의 수만큼 반복문을 돌린다
+        for (const data of alertList) {
+          if (data.userIdx === userIdx) { // 해당 (경매)채팅방에 입장한적이 있고, 알람설정을 한 사람인 경우
+            // 해당 (경매)게시글에 알람설정한 사람들중에, (경매)채팅방에 없는 사람들만 리스트에 담아준다
+            alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
+          }          
+          // else {
+          //   socket.emit('Auction_message', Data);
+          // }
+        }
+      }
 
       //10. 채팅방(경매방)에 있는 유저를 제외한 나머지 노티피케이션 발송
       for (const data of alertList) {
