@@ -14,6 +14,7 @@ export class LiveChatService {
     private userRepository: UserRepository,
   ) {}
 
+  // 라이브방송 입장밴을 당한 유저들의 목록을 응답한다
   async getBanList(
     roomIdx: number,
     boardIdx: number,
@@ -24,6 +25,7 @@ export class LiveChatService {
         idx: boardIdx,
       },
     });
+    // 해당 라이브방송의 호스트인지 확인한다
     if (boardResult.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
@@ -45,7 +47,8 @@ export class LiveChatService {
     }
     return result;
   }
-  async BanDelete(
+  // 유저의 라이브방송 입장밴을 해제한다
+  async banDelete(
     roomIdx: number,
     boardIdx: number,
     userIdx: number,
@@ -56,6 +59,8 @@ export class LiveChatService {
         idx: boardIdx,
       },
     });
+
+    // 해당 라이브방송의 호스트인지 확인한다
     if (boardResult.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
@@ -63,8 +68,9 @@ export class LiveChatService {
     const redis = this.redisService.getClient();
     await redis.srem(banKey, banUserIdx.toString());
   }
+  // 유저의 라이브방송 채팅밴을 해제한다
   async noChatDelete(
-    roomIdx: number,
+    roomIdx: number, // Q: roomIdx는 왜 받는거지? boardIdx랑 값이 다른가?
     boardIdx: number,
     userIdx: number,
     banUserIdx: number,
@@ -74,13 +80,16 @@ export class LiveChatService {
         idx: boardIdx,
       },
     });
+    // 해당 라이브방송의 호스트인지 확인한다
     if (boardResult.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
-    const banKey = `live-noChat-${roomIdx}`;
+    const banKey = `live-noChat-${roomIdx}`; // Q: 여기서 roomIdx대신 boardIdx를 사용하면 안되는건가?
     const redis = this.redisService.getClient();
     await redis.srem(banKey, banUserIdx.toString());
   }
+
+  // 채팅밴을 당한 유저들의 목록을 불러온다
   async getNoChatList(
     roomIdx: number,
     boardIdx: number,
@@ -91,6 +100,7 @@ export class LiveChatService {
         idx: boardIdx,
       },
     });
+    // 해당 라이브방송의 호스트인지 확인한다
     if (boardResult.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }

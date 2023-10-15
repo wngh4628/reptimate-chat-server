@@ -10,6 +10,7 @@ import UseAuthGuards from '../auth/auth-guards/use-auth';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { User } from 'src/domains/user/entities/user.entity';
 import { ChatRoomDto } from './dtos/chat-room.dto';
+import { AuctionUser } from './entities/auction_user.entity';
 
 @ApiTags(SwaggerTag.AUCTIONCHAT)
 @ApiCommonErrorResponseTemplate()
@@ -36,18 +37,16 @@ export class AuctionChatcontroller {
     description: '해당 경매 첫 비딩 시, 참가자 명단에 추가가됩니다.',
   })
   @ApiOkPaginationResponseTemplate({ type: Number })
-  @ApiBody({ type: ChatRoomDto })
+  @ApiBody({ type: AuctionUser })
   // @UseAuthGuards()
   @Post('/bid')
   async auctionParticipation(
     @Res() res,
-    @AuthUser() user: User,
     @Body() dto: { auctionIdx: number; userIdx: number },
   ) {
     const result = await this.chatService.auctionParticipation(
       dto.auctionIdx,
       dto.userIdx,
-      user,
     );
     return HttpResponse.ok(res, result);
   }

@@ -9,7 +9,6 @@ import { AuctionAlert } from './entities/auction_alert.entity';
 import { AuctionUser } from './entities/auction_user.entity';
 import { User } from '../user/entities/user.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ScheduleRepository } from './repositories/schedule.repository';
 import { AuctionAlertRepository } from './repositories/auction-alert.repository';
 import { AuctionChatGateway } from './auction_chat.gateway';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
@@ -17,6 +16,7 @@ import { FCMService } from 'src/utils/fcm.service';
 import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
 import { BoardRepository } from '../live_chat/repositories/board.repository';
 import * as moment from 'moment'; // moment 라이브러리 import
+import { BoardAuctionRepository } from './repositories/board-auction.repository';
 
 interface YourChatMessageType {
   userIdx: number;
@@ -33,7 +33,7 @@ export class AuctionChatService {
   constructor(
     private dataSource: DataSource,
     private readonly redisService: RedisService,
-    private scheduleRepository: ScheduleRepository,
+    private boardAuctionRepository:BoardAuctionRepository,
     private auctionAlertRepository: AuctionAlertRepository,
     private fbTokenRepository: FbTokenRepository,
     private auctionChatGateway: AuctionChatGateway,
@@ -103,8 +103,10 @@ export class AuctionChatService {
         }
       }
       //3. 유저 정보 조회
+      // 3-1. 레디스에서 조회
       const userkey = `auction-user-list-${roomIdx}`;
       const userInfoList = await redis.smembers(userkey);
+      // 3-2. 레디스에 없으면 rds에서 조회하고 레디스에 담아주기
       if (userInfoList.length === 0) {
         const userData = await queryRunner.manager.find(AuctionUser, {
           where: {
@@ -163,7 +165,7 @@ export class AuctionChatService {
         });
         // 현재 Set 키에 저장된 모든 멤버들 조회
         const alertList = await redis.smembers(key);
-        // dto.oppositeIdx와 일치하는 멤버 제거
+        // userIdx와 일치하는 멤버 제거
         const updatedMembers = alertList.filter(
           (member) => member !== userIdx.toString(),
         );
@@ -184,7 +186,6 @@ export class AuctionChatService {
   async auctionParticipation(
     auctionIdx: number,
     userIdx: number,
-    user: User,
   ): Promise<void> {
     const redis = this.redisService.getClient();
     const key = `auction-user-list-${auctionIdx}`;
@@ -209,6 +210,8 @@ export class AuctionChatService {
       await queryRunner.release();
     }
   }
+
+
   @Cron(CronExpression.EVERY_MINUTE)
   async checkSchedules() {
     //const currentTime = '2023-08-14 22:00'; // 테스트용
@@ -219,14 +222,14 @@ export class AuctionChatService {
   }
   //마감 전, 알람 설정되어 있으면 해당 시간에 노티피케이션 발송합니다. 예를들어 22:00에 마감 + 30분 전 알람이면 21:30분에 알람 노티피케이션을 발송합니다.
   async auctionAlertCheck(currentTime: string) {
-    const schedules = await this.scheduleRepository.findAlertTimeByTime(
+    const boardAuctions = await this.boardAuctionRepository.findAlertTimeByTime(
       currentTime,
     );
-    if (schedules.length === 0) {
+    if (boardAuctions.length === 0) {
       console.log('No auction alert schedules to send alerts.');
       return;
     }
-    for (const data of schedules) {
+    for (const data of boardAuctions) {
       //게시글 정보 조회
       const boardInfo = await this.boardRepository.findOne({
         where: {
@@ -261,44 +264,61 @@ export class AuctionChatService {
       }
     }
   }
-  //경매 마감하는 기능
+
+  /*
+  경매 마감하는 기능
+    - 매분 마감시간이 다된 경매가 있는지 확인하고, 있으면 마감 되었다는 메시지를 전송한다.
+    - 전송방식: 유저가 채팅방에 있다면 (websocket으로)전송하고, 채팅방에 없지만 알람설정을 한 경우 FCM으로 전송한다
+  */
   async auctionFinishCheck(
     currentTime: string,
     socketGateway: AuctionChatGateway,
   ) {
-    //마감 처리 로직
-    const schedules = await this.scheduleRepository.findEndTimeByTime(
+
+    const boardAuctions = await this.boardAuctionRepository.findEndTimeByTime(
       currentTime,
     );
-    if (schedules.length === 0) {
+    if (boardAuctions.length === 0) {
       console.log('No end auction schedules to send alerts.');
       return;
     }
-    for (const data of schedules) {
+    for (const data of boardAuctions) {
       //알람 on 설정한 유저들 목록 조회
       let alertList = await this.auctionAlertRepository.find({
         where: {
           auctionIdx: data.idx,
         },
       });
-      //게시글 정보 조회
+      // 마감시간에 해당하는 게시글 정보 조회
       const boardInfo = await this.boardRepository.findOne({
         where: {
           idx: data.boardIdx,
         },
       });
+
+      // 레디스에서 마지막에 입찰한 유저의 정보를 불러온다
+      const redis = this.redisService.getClient();
+      const key = `auction-chat${data.boardIdx}`;
+      const bidderList = await redis.zrevrange(key, 0, 0);
+      const lastBidderInfo = JSON.parse(bidderList[0]);
+
+      // 마지막에 입찰한 유저를 낙찰자(successful_bidder)로 저장
+      data.successfulBidder = lastBidderInfo.userIdx
+      // 마감 상태 end로 변경해서 저장
       data.state = 'end';
-      //게시글 마감 상태 변경
-      this.scheduleRepository.save(data);
+      this.boardAuctionRepository.save(data);
       const rooms = socketGateway.rooms;
       const roomName = `auction-chat-${data.idx.toString()}`;
       const userSocketsMap = rooms.get(roomName);
       if (!userSocketsMap) {
         throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
       }
+
+      // 방에 들어있는 유저들 중에서, alertList에 있으면 alertList에서 삭제하고, alertList에 없으면 '경매 끝' 메시지를 보낸다
+        // Q: 그럼, 알람설정을 한 사람이 방에 들어있으면 메시지를 못받는건가?
       for (const [userIdx, socket] of userSocketsMap) {
         for (const data of alertList) {
-          //노티피케이션 on 상태의 유저도 해당 채팅방에 입장해 있으면 노티피케이션을 받을 필요가 없다. 노티피케이션 유저가 채팅방에 입장해 있을 때 리스트에서 삭제 해준다.
+          // 알람설정을 한 유저가 채팅방에 들어있을 경우, 알람리스트에서 삭제한다
           if (data.userIdx === userIdx) {
             alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
           } else {
@@ -306,7 +326,7 @@ export class AuctionChatService {
           }
         }
       }
-      //노티피케이션 발송
+      // 노티피케이션 발송 (발송대상: 알람설정 o, but 채팅방에 없는 유저)
       for (const data of alertList) {
         const results = await this.fbTokenRepository.find({
           where: {

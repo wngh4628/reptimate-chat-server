@@ -1,13 +1,12 @@
 import { DataSource } from 'typeorm';
 import { PageRequest } from 'src/core/page';
 import { RedisService } from '@liaoliaots/nestjs-redis';
-import { User } from '../user/entities/user.entity';
-import { ScheduleRepository } from './repositories/schedule.repository';
 import { AuctionAlertRepository } from './repositories/auction-alert.repository';
 import { AuctionChatGateway } from './auction_chat.gateway';
 import { FCMService } from 'src/utils/fcm.service';
 import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
 import { BoardRepository } from '../live_chat/repositories/board.repository';
+import { BoardAuctionRepository } from './repositories/board-auction.repository';
 interface YourChatMessageType {
     userIdx: number;
     action: string;
@@ -20,16 +19,16 @@ interface messageList {
 export declare class AuctionChatService {
     private dataSource;
     private readonly redisService;
-    private scheduleRepository;
+    private boardAuctionRepository;
     private auctionAlertRepository;
     private fbTokenRepository;
     private auctionChatGateway;
     private fCMService;
     private boardRepository;
-    constructor(dataSource: DataSource, redisService: RedisService, scheduleRepository: ScheduleRepository, auctionAlertRepository: AuctionAlertRepository, fbTokenRepository: FbTokenRepository, auctionChatGateway: AuctionChatGateway, fCMService: FCMService, boardRepository: BoardRepository);
+    constructor(dataSource: DataSource, redisService: RedisService, boardAuctionRepository: BoardAuctionRepository, auctionAlertRepository: AuctionAlertRepository, fbTokenRepository: FbTokenRepository, auctionChatGateway: AuctionChatGateway, fCMService: FCMService, boardRepository: BoardRepository);
     getChatData(pageRequest: PageRequest, roomIdx: number): Promise<messageList>;
     auctionAlertSet(auctionIdx: number, userIdx: number, action: string): Promise<void>;
-    auctionParticipation(auctionIdx: number, userIdx: number, user: User): Promise<void>;
+    auctionParticipation(auctionIdx: number, userIdx: number): Promise<void>;
     checkSchedules(): Promise<void>;
     auctionAlertCheck(currentTime: string): Promise<void>;
     auctionFinishCheck(currentTime: string, socketGateway: AuctionChatGateway): Promise<void>;

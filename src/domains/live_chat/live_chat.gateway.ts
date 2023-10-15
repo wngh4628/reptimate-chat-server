@@ -136,23 +136,29 @@ export class LiveChatGateway
     const participants = await Array.from(
       (this.nsp.adapter.rooms.get(room) || new Set<string>()).values(),
     );
-    //참여자 정보 레디스에서 가져오기
+    //참여자 정보 레디스에 추가하기
     const jsonMessage = {
       userIdx: userIdx,
       profilePath: profilePath,
       nickname: nickname,
     };
     await redis.sadd(key, JSON.stringify(jsonMessage));
+
+
     const userList = await redis.smembers(key);
-    //상대방에게는 내 유저 정보만 추가하고, 나는 다른 유저 정보까지 추가함
+    // '방금 참가한 유저'에게는 해당 라이브에 참가하고 있는 모든 유저의 목록을 전달하고, 기존에 있던 유저들에게는 '방금 참가한 유저'의 정보만 전달한다
     participants.forEach((participantSocketId) => {
       if (socketId == participantSocketId) {
         this.nsp.to(room).emit('live_participate', userList);
+        // Q: 위가 아니라, 다음과 같이 해야하는거 아닌가? -> socket.emit('live_participate', userList);
+        
       } else {
         this.nsp.to(room).emit('live_participate', jsonMessage);
+        // Q: 위가 아니라, 다음과 같이 해야하는거 아닌가? -> this.nsp.to(room).except(socketId).emit('live_participate', jsonMessage);
       }
     });
   }
+
   @SubscribeMessage('leave-room')
   async leaveRoom(
     @ConnectedSocket() socket: Socket,
@@ -164,13 +170,13 @@ export class LiveChatGateway
   ) {
     const { userIdx, roomIdx } = message;
     const redis = this.redisService.getClient();
-    await userOut(roomIdx, userIdx, redis, this.rooms); //레디스 유저 목록에서 삭제 및 방에서 데이터 삭제 처리
+    await userOut(roomIdx, userIdx, redis, this.rooms); // 레디스 + 서버메모리에 있는 라이브 유저목록에서 유저를 삭제한다 
     const jsonMessage = {
       userIdx: userIdx,
     };
     this.nsp.to(roomIdx).emit('leave-user', jsonMessage);
   }
-  //라이브 방송에서 강제 퇴장 시키는 기능: 유저 목록에서 삭제하고 차단 목록에 추가합니다.
+  // 라이브 방송에서 강제 퇴장 시키는 기능1: 유저 목록에서 삭제하고 차단 목록에 추가합니다.
   @SubscribeMessage('user_ban')
   async userBan(
     @MessageBody()
@@ -178,7 +184,7 @@ export class LiveChatGateway
       userIdx: number;
       banUserIdx: number;
       boardIdx: string;
-      room: string;
+      room: string; // Q: room은 왜 받는거지? boardIdx랑 값이 다른가?
     },
   ) {
     const { userIdx, boardIdx, banUserIdx, room } = message;
@@ -187,19 +193,20 @@ export class LiveChatGateway
         idx: parseInt(boardIdx),
       },
     });
+    // 해당 라이브방송의 호스트인지 확인한다
     if (result.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
-    const banKey = `live-ban-${room}`;
+    const banKey = `live-ban-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
     const redis = this.redisService.getClient();
     await redis.sadd(banKey, banUserIdx);
 
     const jsonMessage = {
       userIdx: banUserIdx,
     };
-    this.nsp.to(room).emit('ban-user', jsonMessage);
+    this.nsp.to(room).emit('ban-user', jsonMessage); // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
   }
-  //라이브 방송에서 강제 퇴장 시키는 기능: 유저 목록에서 삭제하고 차단 목록에 추가합니다.
+  // 라이브 방송에서 강제 퇴장 시키는 기능2: 유저 목록에서 삭제하고 차단 목록에 추가합니다.
   @SubscribeMessage('noChat')
   async noChat(
     @MessageBody()
@@ -207,7 +214,7 @@ export class LiveChatGateway
       userIdx: number;
       banUserIdx: number;
       boardIdx: string;
-      room: string;
+      room: string; // Q: room은 왜 받는거지? boardIdx랑 값이 다른가?
     },
   ) {
     const { userIdx, boardIdx, banUserIdx, room } = message;
@@ -216,14 +223,15 @@ export class LiveChatGateway
         idx: parseInt(boardIdx),
       },
     });
+    // 해당 라이브방송의 호스트인지 확인한다
     if (result.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
-    const banKey = `live-noChat-${room}`;
+    const banKey = `live-noChat-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
     const redis = this.redisService.getClient();
     await redis.sadd(banKey, banUserIdx);
 
-    const roomName = `live-chat-${room}`;
+    const roomName = `live-chat-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
     const userSocketsMap = this.rooms.get(roomName);
     if (!userSocketsMap) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_EXIST);
@@ -282,9 +290,11 @@ function getCurrentDateTimeString() {
 }
 
 async function userOut(roomIdx: string, userIdx: number, redis, rooms) {
-  //레디스 유저 목록에서 삭제 및 방에서 데이터 삭제 처리
+
   const roomName = `live-chat-${roomIdx}`;
   const key = `live-user-list-${roomIdx}`;
+
+  // 서버 메모리에 있는 라이브 유저목록에서 유저삭제 (삭제한 이후에 해당 라이브에 유저가 없으면 라이브까지 삭제)
   if (rooms.has(roomName)) {
     const usersInRoom = rooms.get(roomName);
     if (usersInRoom.has(userIdx)) {
@@ -294,7 +304,7 @@ async function userOut(roomIdx: string, userIdx: number, redis, rooms) {
       }
     }
   }
-  // Set에서 값을 가져와서 JSON 파싱
+  // 레디스에 있는 라이브 유저목록에서 유저삭제
   const setValues = await redis.smembers(key);
   for (const value of setValues) {
     const parsedValue = JSON.parse(value);

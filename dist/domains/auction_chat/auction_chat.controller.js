@@ -23,7 +23,7 @@ const page_1 = require("../../core/page");
 const auction_chat_service_1 = require("./auction_chat.service");
 const auth_user_decorator_1 = require("../../core/decorators/auth-user.decorator");
 const user_entity_1 = require("../user/entities/user.entity");
-const chat_room_dto_1 = require("./dtos/chat-room.dto");
+const auction_user_entity_1 = require("./entities/auction_user.entity");
 let AuctionChatcontroller = class AuctionChatcontroller {
     constructor(chatService) {
         this.chatService = chatService;
@@ -32,8 +32,8 @@ let AuctionChatcontroller = class AuctionChatcontroller {
         const result = await this.chatService.getChatData(pageRequest, auctionIdx);
         return http_response_1.default.ok(res, result);
     }
-    async auctionParticipation(res, user, dto) {
-        const result = await this.chatService.auctionParticipation(dto.auctionIdx, dto.userIdx, user);
+    async auctionParticipation(res, dto) {
+        const result = await this.chatService.auctionParticipation(dto.auctionIdx, dto.userIdx);
         return http_response_1.default.ok(res, result);
     }
     async auctionAlertSet(res, user, auctionIdx, dto) {
@@ -61,13 +61,12 @@ __decorate([
         description: '해당 경매 첫 비딩 시, 참가자 명단에 추가가됩니다.',
     }),
     (0, api_ok_pagination_response_1.ApiOkPaginationResponseTemplate)({ type: Number }),
-    (0, swagger_1.ApiBody)({ type: chat_room_dto_1.ChatRoomDto }),
+    (0, swagger_1.ApiBody)({ type: auction_user_entity_1.AuctionUser }),
     (0, common_1.Post)('/bid'),
     __param(0, (0, common_1.Res)()),
-    __param(1, (0, auth_user_decorator_1.default)()),
-    __param(2, (0, common_1.Body)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, user_entity_1.User, Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuctionChatcontroller.prototype, "auctionParticipation", null);
 __decorate([

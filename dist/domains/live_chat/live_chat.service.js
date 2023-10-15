@@ -49,7 +49,7 @@ let LiveChatService = class LiveChatService {
         }
         return result;
     }
-    async BanDelete(roomIdx, boardIdx, userIdx, banUserIdx) {
+    async banDelete(roomIdx, boardIdx, userIdx, banUserIdx) {
         const boardResult = await this.boardRepository.findOne({
             where: {
                 idx: boardIdx,

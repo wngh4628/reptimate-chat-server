@@ -12,7 +12,6 @@ const auction_chat_gateway_1 = require("./auction_chat.gateway");
 const typeorm_ex_module_1 = require("../../core/typeorm-ex.module");
 const auction_chat_service_1 = require("./auction_chat.service");
 const auction_chat_controller_1 = require("./auction_chat.controller");
-const schedule_repository_1 = require("./repositories/schedule.repository");
 const auction_alert_repository_1 = require("./repositories/auction-alert.repository");
 const user_fbtoken_repository_1 = require("../user/repositories/user.fbtoken.repository");
 const fcm_service_1 = require("../../utils/fcm.service");
@@ -24,7 +23,6 @@ AuctionChatModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_ex_module_1.TypeOrmExModule.forCustomRepository([
-                schedule_repository_1.ScheduleRepository,
                 auction_alert_repository_1.AuctionAlertRepository,
                 user_fbtoken_repository_1.FbTokenRepository,
                 board_repository_1.BoardRepository,

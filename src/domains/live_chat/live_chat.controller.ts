@@ -37,14 +37,14 @@ export class LiveChatcontroller {
   })
   @ApiOkPaginationResponseTemplate({ type: Number })
   @Post('/ban/:roomIdx/:boardIdx/:userIdx/:banUserIdx')
-  async BanDelete(
+  async banDelete(
     @Res() res,
     @Param('roomIdx') roomIdx: number,
     @Param('boardIdx') boardIdx: number,
     @Param('userIdx') userIdx: number,
     @Param('banUserIdx') banUserIdx: number,
   ) {
-    const result = await this.livechatService.BanDelete(
+    const result = await this.livechatService.banDelete(
       roomIdx,
       boardIdx,
       userIdx,

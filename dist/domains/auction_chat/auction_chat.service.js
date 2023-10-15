@@ -19,7 +19,6 @@ const auction_alert_entity_1 = require("./entities/auction_alert.entity");
 const auction_user_entity_1 = require("./entities/auction_user.entity");
 const user_entity_1 = require("../user/entities/user.entity");
 const schedule_1 = require("@nestjs/schedule");
-const schedule_repository_1 = require("./repositories/schedule.repository");
 const auction_alert_repository_1 = require("./repositories/auction-alert.repository");
 const auction_chat_gateway_1 = require("./auction_chat.gateway");
 const http_error_objects_1 = require("../../core/http/http-error-objects");
@@ -27,11 +26,12 @@ const fcm_service_1 = require("../../utils/fcm.service");
 const user_fbtoken_repository_1 = require("../user/repositories/user.fbtoken.repository");
 const board_repository_1 = require("../live_chat/repositories/board.repository");
 const moment = require("moment");
+const board_auction_repository_1 = require("./repositories/board-auction.repository");
 let AuctionChatService = class AuctionChatService {
-    constructor(dataSource, redisService, scheduleRepository, auctionAlertRepository, fbTokenRepository, auctionChatGateway, fCMService, boardRepository) {
+    constructor(dataSource, redisService, boardAuctionRepository, auctionAlertRepository, fbTokenRepository, auctionChatGateway, fCMService, boardRepository) {
         this.dataSource = dataSource;
         this.redisService = redisService;
-        this.scheduleRepository = scheduleRepository;
+        this.boardAuctionRepository = boardAuctionRepository;
         this.auctionAlertRepository = auctionAlertRepository;
         this.fbTokenRepository = fbTokenRepository;
         this.auctionChatGateway = auctionChatGateway;
@@ -151,7 +151,7 @@ let AuctionChatService = class AuctionChatService {
             await queryRunner.release();
         }
     }
-    async auctionParticipation(auctionIdx, userIdx, user) {
+    async auctionParticipation(auctionIdx, userIdx) {
         const redis = this.redisService.getClient();
         const key = `auction-user-list-${auctionIdx}`;
         const queryRunner = this.dataSource.createQueryRunner();
@@ -183,12 +183,12 @@ let AuctionChatService = class AuctionChatService {
         this.auctionAlertCheck(currentTime);
     }
     async auctionAlertCheck(currentTime) {
-        const schedules = await this.scheduleRepository.findAlertTimeByTime(currentTime);
-        if (schedules.length === 0) {
+        const boardAuctions = await this.boardAuctionRepository.findAlertTimeByTime(currentTime);
+        if (boardAuctions.length === 0) {
             console.log('No auction alert schedules to send alerts.');
             return;
         }
-        for (const data of schedules) {
+        for (const data of boardAuctions) {
             const boardInfo = await this.boardRepository.findOne({
                 where: {
                     idx: data.boardIdx,
@@ -216,12 +216,12 @@ let AuctionChatService = class AuctionChatService {
         }
     }
     async auctionFinishCheck(currentTime, socketGateway) {
-        const schedules = await this.scheduleRepository.findEndTimeByTime(currentTime);
-        if (schedules.length === 0) {
+        const boardAuctions = await this.boardAuctionRepository.findEndTimeByTime(currentTime);
+        if (boardAuctions.length === 0) {
             console.log('No end auction schedules to send alerts.');
             return;
         }
-        for (const data of schedules) {
+        for (const data of boardAuctions) {
             let alertList = await this.auctionAlertRepository.find({
                 where: {
                     auctionIdx: data.idx,
@@ -232,8 +232,13 @@ let AuctionChatService = class AuctionChatService {
                     idx: data.boardIdx,
                 },
             });
+            const redis = this.redisService.getClient();
+            const key = `auction-chat${data.boardIdx}`;
+            const bidderList = await redis.zrevrange(key, 0, 0);
+            const lastBidderInfo = JSON.parse(bidderList[0]);
+            data.successfulBidder = lastBidderInfo.userIdx;
             data.state = 'end';
-            this.scheduleRepository.save(data);
+            this.boardAuctionRepository.save(data);
             const rooms = socketGateway.rooms;
             const roomName = `auction-chat-${data.idx.toString()}`;
             const userSocketsMap = rooms.get(roomName);
@@ -273,7 +278,7 @@ AuctionChatService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeorm_1.DataSource,
         nestjs_redis_1.RedisService,
-        schedule_repository_1.ScheduleRepository,
+        board_auction_repository_1.BoardAuctionRepository,
         auction_alert_repository_1.AuctionAlertRepository,
         user_fbtoken_repository_1.FbTokenRepository,
         auction_chat_gateway_1.AuctionChatGateway,

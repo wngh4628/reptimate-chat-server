@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var AuctionUser_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuctionUser = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 const base_entity_1 = require("../../../core/entity/base.entity");
 const typeorm_1 = require("typeorm");
 let AuctionUser = AuctionUser_1 = class AuctionUser extends base_entity_1.default {
@@ -22,10 +24,20 @@ let AuctionUser = AuctionUser_1 = class AuctionUser extends base_entity_1.defaul
     }
 };
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '경매게시글 번호',
+        default: '465',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], AuctionUser.prototype, "auctionIdx", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '유저 아이디',
+        default: '65',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], AuctionUser.prototype, "userIdx", void 0);

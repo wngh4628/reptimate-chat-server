@@ -1,10 +1,12 @@
 export declare enum chatType {
     PERSONAL = "personal",
-    KAKAO = "KAKAO",
-    APPLE = "APPLE"
+    AUCTION = "auction",
+    LIVE = "live"
 }
 export declare enum chat {
     DELETE = "\uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
     BAN = "ban",
-    NORMAL = "normal"
+    NORMAL = "normal",
+    ON = "on",
+    OFF = "off"
 }

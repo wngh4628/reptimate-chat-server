@@ -1,4 +1,4 @@
-//소셜 로그인 타입
+
 export enum chatType {
   PERSONAL = 'personal',
   AUCTION = 'auction',

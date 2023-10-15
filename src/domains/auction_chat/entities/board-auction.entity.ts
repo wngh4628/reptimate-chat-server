@@ -60,6 +60,9 @@ export class BoardAuction extends BaseEntity {
   })
   state: string;
 
+  @Column()
+  successfulBidder: string;
+
   @Column({
     nullable: false,
     length: 150,

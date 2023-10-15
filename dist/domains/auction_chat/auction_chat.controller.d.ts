@@ -6,7 +6,7 @@ export declare class AuctionChatcontroller {
     private readonly chatService;
     constructor(chatService: AuctionChatService);
     getChatData(res: any, pageRequest: PageRequest, auctionIdx: number): Promise<import("express").Response<unknown, Record<string, any>>>;
-    auctionParticipation(res: any, user: User, dto: {
+    auctionParticipation(res: any, dto: {
         auctionIdx: number;
         userIdx: number;
     }): Promise<import("express").Response<unknown, Record<string, any>>>;

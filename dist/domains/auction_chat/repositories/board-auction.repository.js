@@ -11,6 +11,18 @@ const typeorm_1 = require("typeorm");
 const typeorm_ex_decorator_1 = require("../../../core/decorators/typeorm-ex.decorator");
 const board_auction_entity_1 = require("../entities/board-auction.entity");
 let BoardAuctionRepository = class BoardAuctionRepository extends typeorm_1.Repository {
+    async findEndTimeByTime(time) {
+        return await this.createQueryBuilder('boardAuction')
+            .where('boardAuction.endTime = :time', { time })
+            .andWhere('boardAuction.state = :state', { state: 'selling' })
+            .getMany();
+    }
+    async findAlertTimeByTime(time) {
+        return await this.createQueryBuilder('boardAuction')
+            .where('boardAuction.alertTime = :time', { time })
+            .andWhere('boardAuction.state = :state', { state: 'selling' })
+            .getMany();
+    }
 };
 BoardAuctionRepository = __decorate([
     (0, typeorm_ex_decorator_1.CustomRepository)(board_auction_entity_1.BoardAuction)

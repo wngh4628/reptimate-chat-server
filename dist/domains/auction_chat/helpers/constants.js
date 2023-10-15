@@ -5,7 +5,7 @@ var chatType;
 (function (chatType) {
     chatType["PERSONAL"] = "personal";
     chatType["AUCTION"] = "auction";
-    chatType["APPLE"] = "APPLE";
+    chatType["LIVE"] = "live";
 })(chatType = exports.chatType || (exports.chatType = {}));
 var chat;
 (function (chat) {

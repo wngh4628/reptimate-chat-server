@@ -19,7 +19,6 @@ import { AuctionAlertRepository } from './repositories/auction-alert.repository'
 import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository';
 import { FCMService } from 'src/utils/fcm.service';
 import { BoardAuction } from './entities/board-auction.entity';
-import { ScheduleRepository } from './repositories/schedule.repository';
 import * as moment from 'moment'; // moment 라이브러리 import
 import { BoardAuctionRepository } from './repositories/board-auction.repository';
 
@@ -41,7 +40,6 @@ export class AuctionChatGateway
     private auctionAlertRepository: AuctionAlertRepository,
     private fbTokenRepository: FbTokenRepository,
     private fCMService: FCMService,
-    // private scheduleRepository: ScheduleRepository,
     private boardAuctionRepository:BoardAuctionRepository
   ) {}
   private logger = new Logger('Chat Gateway');
@@ -101,7 +99,7 @@ export class AuctionChatGateway
       //1.옥션 정보 조회
       const auctionInfo = await this.getAuctionInfo(room);
 
-      //2.끝난 경매 확인
+      //2.끝난 경매인지 확인
       if (auctionInfo.state === 'end') {
         throw new NotFoundException(HttpErrorConstants.AUCTION_END);
       }
@@ -113,8 +111,12 @@ export class AuctionChatGateway
       //4.연장 룰 확인. 적용되면 시간 추가
       if (
         auctionInfo.extensionRule === 1 &&
+        // Q: extensionTime이 지났다면, 경매가 마감되었다는거 아닌가? (참고로 extensionTime은 옥션게시글이 생성되는 시점에 endtime이랑 같은 값을 할당받는다)
         moment(currentTime).isAfter(auctionInfo.extensionTime)
+
       ) {
+
+        // Q: 마감시간이 연장되면 endTime뿐만 아니라, extensionTime도 같이 1분이 추가되어야 하는거 아닌가?
         auctionInfo.endTime = moment(auctionInfo.endTime)
           .add(1, 'minute')
           .format('YYYY-MM-DD HH:mm');

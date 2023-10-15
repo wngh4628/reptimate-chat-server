@@ -8,7 +8,7 @@ export declare class LiveChatService {
     private userRepository;
     constructor(redisService: RedisService, boardRepository: BoardRepository, userRepository: UserRepository);
     getBanList(roomIdx: number, boardIdx: number, userIdx: number): Promise<UserProfileDto[]>;
-    BanDelete(roomIdx: number, boardIdx: number, userIdx: number, banUserIdx: number): Promise<void>;
+    banDelete(roomIdx: number, boardIdx: number, userIdx: number, banUserIdx: number): Promise<void>;
     noChatDelete(roomIdx: number, boardIdx: number, userIdx: number, banUserIdx: number): Promise<void>;
     getNoChatList(roomIdx: number, boardIdx: number, userIdx: number): Promise<UserProfileDto[]>;
 }

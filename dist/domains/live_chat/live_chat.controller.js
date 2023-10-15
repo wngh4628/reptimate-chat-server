@@ -28,8 +28,8 @@ let LiveChatcontroller = class LiveChatcontroller {
         const result = await this.livechatService.getBanList(roomIdx, boardIdx, userIdx);
         return http_response_1.default.ok(res, result);
     }
-    async BanDelete(res, roomIdx, boardIdx, userIdx, banUserIdx) {
-        const result = await this.livechatService.BanDelete(roomIdx, boardIdx, userIdx, banUserIdx);
+    async banDelete(res, roomIdx, boardIdx, userIdx, banUserIdx) {
+        const result = await this.livechatService.banDelete(roomIdx, boardIdx, userIdx, banUserIdx);
         return http_response_1.default.ok(res, result);
     }
     async getNoChatList(res, roomIdx, boardIdx, userIdx) {
@@ -70,7 +70,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Number, Number, Number, Number]),
     __metadata("design:returntype", Promise)
-], LiveChatcontroller.prototype, "BanDelete", null);
+], LiveChatcontroller.prototype, "banDelete", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '라이브 채팅 차단 유저 조회',
