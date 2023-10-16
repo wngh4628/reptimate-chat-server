@@ -35,6 +35,10 @@ export class ChatService {
       },
     });
 
+    if(!result){
+        throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
+    }
+
     return result.chatRoomIdx;
   }
   async createRoom(dto: CreateRoomDto, userIdx: number) {

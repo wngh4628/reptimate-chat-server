@@ -50,6 +50,9 @@ let ChatService = class ChatService {
                 oppositeIdx: oppositeIdx,
             },
         });
+        if (!result) {
+            throw new common_1.NotFoundException(http_error_objects_1.HttpErrorConstants.CHATROOM_NOT_EXIST);
+        }
         return result.chatRoomIdx;
     }
     async createRoom(dto, userIdx) {
