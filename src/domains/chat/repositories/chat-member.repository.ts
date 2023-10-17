@@ -12,6 +12,7 @@ export class ChatMemberRepository extends Repository<ChatMember> {
     const [result, totalCount] = await this.createQueryBuilder('chatMember')
       .leftJoinAndSelect('chatMember.chatRoom', 'chatRoom')
       .where('chatMember.userIdx = :userIdx', { userIdx })
+      .andWhere('chatRoom.recentMessage IS NOT NULL')
       .orderBy('chatRoom.updatedAt', pageRequest.order)
       .take(pageRequest.limit)
       .skip(pageRequest.offset)

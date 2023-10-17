@@ -60,7 +60,7 @@ let Chatcontroller = class Chatcontroller {
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '채팅방 생성',
-        description: '채팅방을 생성합니다!',
+        description: '채팅방을 생성합니다',
     }),
     (0, apt_error_response_1.ApiErrorResponseTemplate)([
         {
