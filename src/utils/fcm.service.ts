@@ -14,13 +14,13 @@ export class FCMService {
     }
     this.fcm = admin.messaging();
   }
-  async sendFCM(type:string, fbTokens: string, title: string, description: string) {
+  async sendFCM(fbTokens: string, title: string, description: string) {
     try {
       const message = {
         notification: {
-          type: type,
           title: title,
           body: description,
+          
         },
         tokens: [fbTokens],
         android: {

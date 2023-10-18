@@ -203,6 +203,10 @@ let AuctionChatService = class AuctionChatService {
                     auctionIdx: data.idx,
                 },
             });
+            const auctionClosingRemindAlarmBody = {
+                type: 'auctionClosingRemind',
+                description: `해당 경매 마감이 ${leftMinute}분 남았습니다`,
+            };
             for (const data of alertList) {
                 const results = await this.fbTokenRepository.find({
                     where: {
@@ -210,7 +214,7 @@ let AuctionChatService = class AuctionChatService {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM('auctionClosingRemind', data.fbToken, boardInfo.title, `해당 경매 마감이 ${leftMinute}분 남았습니다.`);
+                    this.fCMService.sendFCM(data.fbToken, boardInfo.title, JSON.stringify(auctionClosingRemindAlarmBody));
                 }
             }
         }
@@ -255,6 +259,10 @@ let AuctionChatService = class AuctionChatService {
                     }
                 }
             }
+            const auctionClosedAlarmBody = {
+                type: 'auctionClosed',
+                description: '해당 경매가 마감되었습니다.',
+            };
             for (const data of alertList) {
                 const results = await this.fbTokenRepository.find({
                     where: {
@@ -262,7 +270,7 @@ let AuctionChatService = class AuctionChatService {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM('auctionClosed', data.fbToken, boardInfo.title, '해당 경매가 마감되었습니다.');
+                    this.fCMService.sendFCM(data.fbToken, boardInfo.title, JSON.stringify(auctionClosedAlarmBody));
                 }
             }
         }

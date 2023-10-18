@@ -20,6 +20,11 @@ import { FbTokenRepository } from '../user/repositories/user.fbtoken.repository'
 import { FCMService } from 'src/utils/fcm.service';
 import { UserService } from '../user/user.service';
 
+interface AlarmBody {
+  type: string;
+  description: string;
+}
+
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
@@ -149,15 +154,22 @@ export class EventsGateway
             userIdx: message.oppositeIdx,
           },
         });
+
+
+        // 채팅 알림 바디 객체 생성
+        const chatAlarmBody:AlarmBody = {
+          type: 'chat',
+          description: `${message.message}`,
+        };
+
         for (const data of results) {
           const userInfo = this.userService.getUserDetailInfo(
             message.oppositeIdx,
           );
           this.fCMService.sendFCM(
-            'chat',
             data.fbToken,
             (await userInfo).nickname,
-            message.message,
+            JSON.stringify(chatAlarmBody)
           );
         }
       }

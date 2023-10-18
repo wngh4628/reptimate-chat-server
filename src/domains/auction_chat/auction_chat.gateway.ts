@@ -22,6 +22,11 @@ import { BoardAuction } from './entities/board-auction.entity';
 import * as moment from 'moment'; // moment 라이브러리 import
 import { BoardAuctionRepository } from './repositories/board-auction.repository';
 
+interface AlarmBody {
+  type: string;
+  description: string;
+}
+
 @WebSocketGateway({
   namespace: 'AuctionChat',
   cors: {
@@ -180,6 +185,12 @@ export class AuctionChatGateway
         }
       }
 
+      // 경매가 갱신 알림 바디 객체 생성
+      const auctionPriceUpdateAlarmBody:AlarmBody = {
+        type: 'auctionPriceUpdate',
+        description: `해당 경매가가 ${message.message}로 갱신되었습니다.`,
+      };
+
       //10. 채팅방(경매방)에 있는 유저를 제외한 나머지 노티피케이션 발송
       for (const data of alertList) {
         const results = await this.fbTokenRepository.find({
@@ -187,12 +198,12 @@ export class AuctionChatGateway
             userIdx: data.userIdx,
           },
         });
+
         for (const data of results) {
           this.fCMService.sendFCM(
-            'auctionPriceUpdate',
             data.fbToken,
             '타이틀',
-            `해당 경매가가 ${message.message}로 갱신되었습니다.`,
+            JSON.stringify(auctionPriceUpdateAlarmBody),
           );
         }
       }
