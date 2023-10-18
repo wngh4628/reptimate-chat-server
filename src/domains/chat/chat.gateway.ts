@@ -154,6 +154,7 @@ export class EventsGateway
             message.oppositeIdx,
           );
           this.fCMService.sendFCM(
+            'chat',
             data.fbToken,
             (await userInfo).nickname,
             message.message,

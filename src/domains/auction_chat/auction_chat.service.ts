@@ -256,6 +256,7 @@ export class AuctionChatService {
         });
         for (const data of results) {
           this.fCMService.sendFCM(
+            'auctionClosingRemind',
             data.fbToken,
             boardInfo.title,
             `해당 경매 마감이 ${leftMinute}분 남았습니다.`,
@@ -335,6 +336,7 @@ export class AuctionChatService {
         });
         for (const data of results) {
           this.fCMService.sendFCM(
+            'auctionClosed',
             data.fbToken,
             boardInfo.title,
             '해당 경매가 마감되었습니다.',

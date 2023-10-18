@@ -125,7 +125,7 @@ let AuctionChatGateway = class AuctionChatGateway {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM(data.fbToken, '타이틀', `해당 경매가가 ${message.message}로 갱신되었습니다.`);
+                    this.fCMService.sendFCM('auctionPriceUpdate', data.fbToken, '타이틀', `해당 경매가가 ${message.message}로 갱신되었습니다.`);
                 }
             }
             await queryRunner.commitTransaction();

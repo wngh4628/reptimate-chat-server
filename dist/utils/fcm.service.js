@@ -22,10 +22,11 @@ let FCMService = class FCMService {
         }
         this.fcm = admin.messaging();
     }
-    async sendFCM(fbTokens, title, description) {
+    async sendFCM(type, fbTokens, title, description) {
         try {
             const message = {
                 notification: {
+                    type: type,
                     title: title,
                     body: description,
                 },

@@ -102,7 +102,7 @@ let EventsGateway = class EventsGateway {
                 });
                 for (const data of results) {
                     const userInfo = this.userService.getUserDetailInfo(message.oppositeIdx);
-                    this.fCMService.sendFCM(data.fbToken, (await userInfo).nickname, message.message);
+                    this.fCMService.sendFCM('chat', data.fbToken, (await userInfo).nickname, message.message);
                 }
             }
             await queryRunner.commitTransaction();
