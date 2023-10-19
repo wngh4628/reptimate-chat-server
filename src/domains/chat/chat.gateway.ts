@@ -126,6 +126,7 @@ export class EventsGateway
       }
       entityToUpdate.recentMessage = message.message;
       await entityToUpdate.save();
+
       //3. 레디스 저장
       const jsonMessage = {
         userIdx: message.userIdx,
@@ -138,8 +139,10 @@ export class EventsGateway
       const key = `personal-chat${message.room}`;
       const redis = this.redisService.getClient();
       await redis.zadd(key, score, JSON.stringify(jsonMessage));
+
       //4. 발송
       this.nsp.to(message.room).emit('message', jsonMessage);
+
       //5. 상대방이 현재 방에 존재하는지 확인하고 노티피케이션 발송
       const socketIdsInRoom = Array.from(
         this.nsp.adapter.rooms.get(message.room) || [],
@@ -155,20 +158,27 @@ export class EventsGateway
           },
         });
 
-
         // 채팅 알림 바디 객체 생성
         const chatAlarmBody:AlarmBody = {
           type: 'chat',
           description: `${message.message}`,
         };
 
+
+        console.log(`발신자 ID: ${message.userIdx}`);
+
+        const senderInfo = await this.userService.getUserDetailInfo(
+          message.userIdx,
+        );
+
+        console.log(`발신자 닉네임: ${senderInfo.nickname}`);
+        
+
         for (const data of results) {
-          const userInfo = this.userService.getUserDetailInfo(
-            message.userIdx,
-          );
+
           this.fCMService.sendFCM(
             data.fbToken,
-            (await userInfo).nickname,
+            senderInfo.nickname,
             JSON.stringify(chatAlarmBody)
           );
         }
