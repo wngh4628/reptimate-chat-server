@@ -164,7 +164,7 @@ export class EventsGateway
 
         for (const data of results) {
           const userInfo = this.userService.getUserDetailInfo(
-            message.oppositeIdx,
+            message.userIdx,
           );
           this.fCMService.sendFCM(
             data.fbToken,
