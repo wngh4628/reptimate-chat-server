@@ -104,9 +104,7 @@ let EventsGateway = class EventsGateway {
                     type: 'chat',
                     description: `${message.message}`,
                 };
-                console.log(`발신자 ID: ${message.userIdx}`);
                 const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
-                console.log(`발신자 닉네임: ${senderInfo.nickname}`);
                 for (const data of results) {
                     this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, JSON.stringify(chatAlarmBody));
                 }

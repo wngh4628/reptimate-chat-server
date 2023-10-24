@@ -164,14 +164,9 @@ export class EventsGateway
           description: `${message.message}`,
         };
 
-
-        console.log(`발신자 ID: ${message.userIdx}`);
-
         const senderInfo = await this.userService.getUserDetailInfo(
           message.userIdx,
         );
-
-        console.log(`발신자 닉네임: ${senderInfo.nickname}`);
         
 
         for (const data of results) {
@@ -183,6 +178,7 @@ export class EventsGateway
           );
         }
       }
+
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
