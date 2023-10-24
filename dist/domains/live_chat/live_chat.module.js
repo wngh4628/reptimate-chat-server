@@ -15,11 +15,16 @@ const board_repository_1 = require("./repositories/board.repository");
 const live_chat_controller_1 = require("./live_chat.controller");
 const live_chat_service_1 = require("./live_chat.service");
 const user_repository_1 = require("../user/repositories/user.repository");
+const config_1 = require("@nestjs/config");
 let LiveChaModule = class LiveChaModule {
 };
 LiveChaModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
+            }),
             typeorm_ex_module_1.TypeOrmExModule.forCustomRepository([board_repository_1.BoardRepository, user_repository_1.UserRepository]),
             nestjs_redis_1.RedisModule.forRoot({
                 readyLog: true,

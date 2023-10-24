@@ -6,8 +6,13 @@ import { BoardRepository } from './repositories/board.repository';
 import { LiveChatcontroller } from './live_chat.controller';
 import { LiveChatService } from './live_chat.service';
 import { UserRepository } from '../user/repositories/user.repository';
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
+    }),
     TypeOrmExModule.forCustomRepository([BoardRepository, UserRepository]),
     RedisModule.forRoot({
       readyLog: true,

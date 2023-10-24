@@ -115,6 +115,7 @@ export class LiveChatGateway
     const banKey = `live-ban-${room}`;
     const redis = this.redisService.getClient();
     const isBanned = await redis.sismember(banKey, userIdx.toString());
+    // 입장시 밴당한 유저라면, 밴당한 유저라고 응답 
     if (isBanned) {
       socket.emit('ban-notification', {
         message: HttpErrorConstants.LIVEROOM_BAN,
