@@ -9,19 +9,19 @@ import { UserRepository } from '../user/repositories/user.repository';
 import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
-    }),
+    // ConfigModule.forRoot({
+    //   isGlobal: true,
+    //   envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
+    // }),
     TypeOrmExModule.forCustomRepository([BoardRepository, UserRepository]),
-    RedisModule.forRoot({
-      readyLog: true,
-      config: {
-        host: process.env.REDIS_HOST,
-        port: 6379,
-        password: process.env.REDIS_PASSWORD
-      },
-    }),
+    // RedisModule.forRoot({
+    //   readyLog: true,
+    //   config: {
+    //     host: process.env.REDIS_HOST,
+    //     port: 6379,
+    //     password: process.env.REDIS_PASSWORD
+    //   },
+    // }),
   ],
   providers: [LiveChatGateway, LiveChatService],
   controllers: [LiveChatcontroller],

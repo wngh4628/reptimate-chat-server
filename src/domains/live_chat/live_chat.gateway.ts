@@ -218,19 +218,37 @@ export class LiveChatGateway
       room: string; // Q: room은 왜 받는거지? boardIdx랑 값이 다른가?
     },
   ) {
+    
     const { userIdx, boardIdx, banUserIdx, room } = message;
+
+    // console.log(`----------------------------------noChat요청 로그 시작----------------------------------`)
+    // console.log(`userIdx: ${userIdx}`)
+    // console.log(`boardIdx: ${boardIdx}`)
+    // console.log(`banUserIdx: ${banUserIdx}`)
+    // console.log(`room: ${room}`)
+
     const result = await this.boardRepository.findOne({
       where: {
         idx: parseInt(boardIdx),
       },
     });
+
+    // console.log(`result.userIdx: ${result.userIdx}`)
+
+    // console.log(`----------------------------------noChat요청 로그 끝----------------------------------`)
+  
     // 해당 라이브방송의 호스트인지 확인한다
     if (result.userIdx !== userIdx) {
       throw new NotFoundException(HttpErrorConstants.LIVEROOM_NOT_HOST);
     }
-    const banKey = `live-noChat-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
+
+    const banKey = `live-noChat-test`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
     const redis = this.redisService.getClient();
-    await redis.sadd(banKey, banUserIdx);
+    redis.sadd(banKey, 'test');
+
+    // const banKey = `live-noChat-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
+    // const redis = this.redisService.getClient();
+    // await redis.sadd(banKey, banUserIdx);
 
     const roomName = `live-chat-${room}`; // Q: 여기서 room대신 boardIdx를 사용하면 안되는건가?
     const userSocketsMap = this.rooms.get(roomName);

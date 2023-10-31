@@ -12,6 +12,10 @@ import { BoardAuctionRepository } from './repositories/board-auction.repository'
 
 @Module({
   imports: [
+    // ConfigModule.forRoot({
+    //   isGlobal: true,
+    //   envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
+    // }),
     TypeOrmExModule.forCustomRepository([
       AuctionAlertRepository,
       FbTokenRepository,

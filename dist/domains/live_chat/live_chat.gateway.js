@@ -152,9 +152,9 @@ let LiveChatGateway = class LiveChatGateway {
         if (result.userIdx !== userIdx) {
             throw new common_1.NotFoundException(http_error_objects_1.HttpErrorConstants.LIVEROOM_NOT_HOST);
         }
-        const banKey = `live-noChat-${room}`;
+        const banKey = `live-noChat-test`;
         const redis = this.redisService.getClient();
-        await redis.sadd(banKey, banUserIdx);
+        redis.sadd(banKey, 'test');
         const roomName = `live-chat-${room}`;
         const userSocketsMap = this.rooms.get(roomName);
         if (!userSocketsMap) {
