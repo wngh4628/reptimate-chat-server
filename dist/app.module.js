@@ -31,7 +31,7 @@ AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: process.env.NODE_ENV === 'dev' ? 'env.dev' : 'env.prod',
+                envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod',
             }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'mysql',
