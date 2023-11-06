@@ -153,11 +153,11 @@ export class EventsGateway
       const otherUsersExist = otherUserIds.length > 0;
       // if (otherUsersExist === false) {
       
-        // const results = await this.fbTokenRepository.find({
-        //   where: {
-        //     userIdx: message.oppositeIdx,
-        //   },
-        // });
+        const results = await this.fbTokenRepository.find({
+          where: {
+            userIdx: message.oppositeIdx,
+          },
+        });
 
         // 채팅 알림 바디 객체 생성
         const chatAlarmBody:AlarmBody = {
@@ -171,24 +171,16 @@ export class EventsGateway
         );
       
 
-        // for (const data of results) {
+        for (const data of results) {
 
-        //   console.log(`${data.userIdx}의 ${data.platform}토큰값: ${data.fbToken}`);
+          console.log(`${data.userIdx}의 ${data.platform}토큰값: ${data.fbToken}`);
 
-        //   this.fCMService.sendFCM(
-        //     data.fbToken,
-        //     senderInfo.nickname,
-        //     `"${JSON.stringify(chatAlarmBody)}"`
-        //   );
-        // }
-
-        this.fCMService.sendFCM(
-          'd74D4jnjMqqdBhe32XRgm8:APA91bHJvTCUgKcKwMPuE_9ACOv7A-UVTI5C86pH_6nbniXvvzQlPVvGbvchrDaoy6XLRRUjY8fwsvZwPK0NAupftfgcP3PWZmAA0pzzmfyTpnWgL7wW7tslxKFwNkuRHpjqhZHtI6nK',
-          senderInfo.nickname,
-          `"${JSON.stringify(chatAlarmBody)}"`
-        );
-
-        
+          this.fCMService.sendFCM(
+            data.fbToken,
+            senderInfo.nickname,
+            `"${JSON.stringify(chatAlarmBody)}"`
+          );
+        }
         
       // }
 
