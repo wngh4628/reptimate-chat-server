@@ -94,20 +94,12 @@ let EventsGateway = class EventsGateway {
             const socketIdsInRoom = Array.from(this.nsp.adapter.rooms.get(message.room) || []);
             const otherUserIds = socketIdsInRoom.filter((socketId) => socketId !== socket.id);
             const otherUsersExist = otherUserIds.length > 0;
-            const results = await this.fbTokenRepository.find({
-                where: {
-                    userIdx: message.oppositeIdx,
-                },
-            });
             const chatAlarmBody = {
                 type: 'chat',
                 description: `${message.message}`,
             };
             const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
-            for (const data of results) {
-                console.log(`${data.userIdx}의 ${data.platform}토큰값: ${data.fbToken}`);
-                this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, `"${JSON.stringify(chatAlarmBody)}"`);
-            }
+            this.fCMService.sendFCM('d74D4jnjMqqdBhe32XRgm8:APA91bHJvTCUgKcKwMPuE_9ACOv7A-UVTI5C86pH_6nbniXvvzQlPVvGbvchrDaoy6XLRRUjY8fwsvZwPK0NAupftfgcP3PWZmAA0pzzmfyTpnWgL7wW7tslxKFwNkuRHpjqhZHtI6nK', senderInfo.nickname, `"${JSON.stringify(chatAlarmBody)}"`);
             await queryRunner.commitTransaction();
         }
         catch (error) {
