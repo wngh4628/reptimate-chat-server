@@ -118,10 +118,6 @@ let AuctionChatGateway = class AuctionChatGateway {
                     }
                 }
             }
-            const auctionPriceUpdateAlarmBody = {
-                type: 'auctionPriceUpdate',
-                description: `해당 경매가가 ${message.message}로 갱신되었습니다.`,
-            };
             for (const data of alertList) {
                 const results = await this.fbTokenRepository.find({
                     where: {
@@ -129,7 +125,7 @@ let AuctionChatGateway = class AuctionChatGateway {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM(data.fbToken, '타이틀', JSON.stringify(auctionPriceUpdateAlarmBody));
+                    this.fCMService.sendFCM(data.fbToken, 'auction', `해당 경매가가 ${message.message}로 갱신되었습니다.`);
                 }
             }
             await queryRunner.commitTransaction();

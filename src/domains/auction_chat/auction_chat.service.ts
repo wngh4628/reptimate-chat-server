@@ -28,11 +28,6 @@ interface messageList {
   userInfo: string[];
 }
 
-interface AlarmBody {
-  type: string;
-  description: string;
-}
-
 @Injectable()
 export class AuctionChatService {
   constructor(
@@ -253,12 +248,6 @@ export class AuctionChatService {
         },
       });
 
-
-      // 마감전 알림 바디 객체 생성
-      const auctionClosingRemindAlarmBody:AlarmBody = {
-        type: 'auctionClosingRemind',
-        description: `해당 경매 마감이 ${leftMinute}분 남았습니다`,
-      };
               
       //노티피케이션 FCM 발송
       for (const data of alertList) {
@@ -271,8 +260,8 @@ export class AuctionChatService {
         for (const data of results) {
           this.fCMService.sendFCM(
             data.fbToken,
-            boardInfo.title,
-            JSON.stringify(auctionClosingRemindAlarmBody)
+            'auction',
+            `해당 경매 마감이 ${leftMinute}분 남았습니다`
           );
         }
       }
@@ -340,13 +329,6 @@ export class AuctionChatService {
           }
         }
       }
-
-      // 마감 알림 바디 객체 생성
-      const auctionClosedAlarmBody:AlarmBody = {
-        type: 'auctionClosed',
-        description: '해당 경매가 마감되었습니다.',
-      };
-
               
       // 노티피케이션 발송 (발송대상: 알람설정 o, but 채팅방에 없는 유저)
       for (const data of alertList) {
@@ -358,8 +340,8 @@ export class AuctionChatService {
         for (const data of results) {
           this.fCMService.sendFCM(
             data.fbToken,
-            boardInfo.title,
-            JSON.stringify(auctionClosedAlarmBody)
+            'auction',
+            '해당 경매가 마감되었습니다.'
           );
         }
       }
