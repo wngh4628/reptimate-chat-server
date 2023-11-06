@@ -151,7 +151,9 @@ export class EventsGateway
         (socketId) => socketId !== socket.id,
       );
       const otherUsersExist = otherUserIds.length > 0;
-      if (otherUsersExist === false) {
+      // if (otherUsersExist === false) {
+
+      
         const results = await this.fbTokenRepository.find({
           where: {
             userIdx: message.oppositeIdx,
@@ -172,13 +174,15 @@ export class EventsGateway
 
         for (const data of results) {
 
+          console.log(`${data.userIdx}의 ${data.platform}토큰값: ${data.fbToken}`);
+
           this.fCMService.sendFCM(
             data.fbToken,
             senderInfo.nickname,
             `"${JSON.stringify(chatAlarmBody)}"`
           );
         }
-      }
+      // }
 
       await queryRunner.commitTransaction();
     } catch (error) {
