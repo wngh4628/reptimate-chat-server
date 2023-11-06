@@ -164,17 +164,18 @@ export class EventsGateway
           description: `${message.message}`,
         };
 
+
         const senderInfo = await this.userService.getUserDetailInfo(
           message.userIdx,
         );
-        
+      
 
         for (const data of results) {
 
           this.fCMService.sendFCM(
             data.fbToken,
             senderInfo.nickname,
-            JSON.stringify(chatAlarmBody)
+            `"${JSON.stringify(chatAlarmBody)}"`
           );
         }
       }

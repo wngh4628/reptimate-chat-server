@@ -106,7 +106,7 @@ let EventsGateway = class EventsGateway {
                 };
                 const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
                 for (const data of results) {
-                    this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, JSON.stringify(chatAlarmBody));
+                    this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, `"${JSON.stringify(chatAlarmBody)}"`);
                 }
             }
             await queryRunner.commitTransaction();
