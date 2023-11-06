@@ -99,7 +99,7 @@ let EventsGateway = class EventsGateway {
                 description: `${message.message}`,
             };
             const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
-            this.fCMService.sendFCM('d74D4jnjMqqdBhe32XRgm8:APA91bHJvTCUgKcKwMPuE_9ACOv7A-UVTI5C86pH_6nbniXvvzQlPVvGbvchrDaoy6XLRRUjY8fwsvZwPK0NAupftfgcP3PWZmAA0pzzmfyTpnWgL7wW7tslxKFwNkuRHpjqhZHtI6nK', senderInfo.nickname, `"${JSON.stringify(chatAlarmBody)}"`);
+            this.fCMService.sendFCM('edIMd_qknXbYRibScsU1v3:APA91bGS8ZwmiTKHGykTSR7Itw3ZWeEqgEE7jbKj5DuHMQK6SJwzROvbyEd91K9l_dW1__H5xuFKFJ1h-eWOckra6jDyo4W0YMoDDcJMYiTwi7dDnu5RjrHsphfZxIcnhNr7GS349Mk_', senderInfo.nickname, `"${JSON.stringify(chatAlarmBody)}"`);
             await queryRunner.commitTransaction();
         }
         catch (error) {
