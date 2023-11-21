@@ -147,7 +147,7 @@ export class EventsGateway
         (socketId) => socketId !== socket.id,
       );
       const otherUsersExist = otherUserIds.length > 0;
-      // if (otherUsersExist === false) {
+      if (otherUsersExist === false) {
       
         const results = await this.fbTokenRepository.find({
           where: {
@@ -172,7 +172,7 @@ export class EventsGateway
           );
         }
         
-      // }
+      }
 
       await queryRunner.commitTransaction();
     } catch (error) {

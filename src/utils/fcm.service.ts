@@ -17,24 +17,31 @@ export class FCMService {
   async sendFCM(fbTokens: string, title: string, description: string) {
     try {
 
-      const message = {
-        notification: {
+      const message
+      = {
+        // notification: {
+        //   title: title,
+        //   body: description,
+        // },
+        data: {
           title: title,
           body: description,
           
         },
         tokens: [fbTokens],
-        android: {
-          data: {},
-        },
-        apns: {
-          payload: {
-            aps: {},
-          },
-        },
+        // token: fbTokens,
+        // android: {
+        //   data: {},
+        // },
+        // apns: {
+        //   payload: {
+        //     aps: {},
+        //   },
+        // },
       };
 
       this.fcm.sendEachForMulticast(message);
+      // this.fcm.send(message);
     } catch (error) {
       console.log('Error sending messages:', error);
     }
