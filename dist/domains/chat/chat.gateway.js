@@ -68,6 +68,7 @@ let EventsGateway = class EventsGateway {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            this.logger.log(`채팅 발신 이벤트(1) - 발신자 ID: ${message.userIdx} / 수신자 ID: ${message.oppositeIdx} / room ID: ${message.room} / 메시지: ${message.message}`);
             const score = Date.now();
             const Data = chat_conversation_entity_1.ChatConversation.from(constants_1.chatType.PERSONAL, score, parseInt(message.room), message.userIdx, message.message);
             await queryRunner.manager.save(Data);
@@ -92,7 +93,9 @@ let EventsGateway = class EventsGateway {
             await redis.zadd(key, score, JSON.stringify(jsonMessage));
             this.nsp.to(message.room).emit('message', jsonMessage);
             const socketIdsInRoom = Array.from(this.nsp.adapter.rooms.get(message.room) || []);
+            this.logger.log(`채팅 발신 이벤트(2) - ${message.room}번 방에 몇명이 있는가? (발신자 포함) ${socketIdsInRoom.length}`);
             const otherUserIds = socketIdsInRoom.filter((socketId) => socketId !== socket.id);
+            this.logger.log(`채팅 발신 이벤트(3) - ${message.room}번 방에 몇명이 있는가? (발신자 제외) ${otherUserIds.length}`);
             const otherUsersExist = otherUserIds.length > 0;
             if (otherUsersExist === false) {
                 const results = await this.fbTokenRepository.find({
@@ -102,7 +105,7 @@ let EventsGateway = class EventsGateway {
                 });
                 const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
                 for (const data of results) {
-                    console.log(`${data.userIdx}의 ${data.platform}토큰값: ${data.fbToken}`);
+                    this.logger.log(`채팅 발신 이벤트(4) - ${data.fbToken}에 알림을 보냈다.`);
                     this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, `${message.message}`);
                 }
             }
