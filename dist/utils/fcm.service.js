@@ -25,7 +25,7 @@ let FCMService = class FCMService {
     async sendFCM(fbTokens, title, description) {
         try {
             const message = {
-                data: {
+                notification: {
                     title: title,
                     body: description,
                 },

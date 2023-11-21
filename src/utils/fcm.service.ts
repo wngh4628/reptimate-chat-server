@@ -19,15 +19,15 @@ export class FCMService {
 
       const message
       = {
-        // notification: {
-        //   title: title,
-        //   body: description,
-        // },
-        data: {
+        notification: {
           title: title,
           body: description,
-          
         },
+        // data: {
+        //   title: title,
+        //   body: description,
+          
+        // },
         tokens: [fbTokens],
         // token: fbTokens,
         // android: {
