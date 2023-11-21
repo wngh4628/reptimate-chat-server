@@ -23,25 +23,18 @@ export class FCMService {
           title: title,
           body: description,
         },
-        // data: {
-        //   title: title,
-        //   body: description,
-          
-        // },
         tokens: [fbTokens],
-        // token: fbTokens,
-        // android: {
-        //   data: {},
-        // },
-        // apns: {
-        //   payload: {
-        //     aps: {},
-        //   },
-        // },
+        android: {
+          data: {},
+        },
+        apns: {
+          payload: {
+            aps: {},
+          },
+        },
       };
 
       this.fcm.sendEachForMulticast(message);
-      // this.fcm.send(message);
     } catch (error) {
       console.log('Error sending messages:', error);
     }

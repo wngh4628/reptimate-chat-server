@@ -30,6 +30,14 @@ let FCMService = class FCMService {
                     body: description,
                 },
                 tokens: [fbTokens],
+                android: {
+                    data: {},
+                },
+                apns: {
+                    payload: {
+                        aps: {},
+                    },
+                },
             };
             this.fcm.sendEachForMulticast(message);
         }
