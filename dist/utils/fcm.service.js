@@ -25,19 +25,11 @@ let FCMService = class FCMService {
     async sendFCM(fbTokens, title, description) {
         try {
             const message = {
-                notification: {
+                data: {
                     title: title,
                     body: description,
                 },
                 tokens: [fbTokens],
-                android: {
-                    data: {},
-                },
-                apns: {
-                    payload: {
-                        aps: {},
-                    },
-                },
             };
             this.fcm.sendEachForMulticast(message);
         }
