@@ -98,6 +98,7 @@ export class EventsGateway
       room: string;
     },
   ) {
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -164,7 +165,7 @@ export class EventsGateway
       );
 
       const otherUsersExist = otherUserIds.length > 0;
-      if (otherUsersExist === false) {
+      // if (otherUsersExist === false) {
       
         const results = await this.fbTokenRepository.find({
           where: {
@@ -176,7 +177,6 @@ export class EventsGateway
           message.userIdx,
         );
       
-
         for (const data of results) {
 
           this.logger.log(
@@ -189,7 +189,7 @@ export class EventsGateway
             `${message.message}`
           );
         }
-      }
+      // }
 
       await queryRunner.commitTransaction();
     } catch (error) {

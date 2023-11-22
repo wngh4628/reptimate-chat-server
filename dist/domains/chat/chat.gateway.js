@@ -97,17 +97,15 @@ let EventsGateway = class EventsGateway {
             const otherUserIds = socketIdsInRoom.filter((socketId) => socketId !== socket.id);
             this.logger.log(`채팅 발신 이벤트(3) - ${message.room}번 방에 몇명이 있는가? (발신자 제외) ${otherUserIds.length}`);
             const otherUsersExist = otherUserIds.length > 0;
-            if (otherUsersExist === false) {
-                const results = await this.fbTokenRepository.find({
-                    where: {
-                        userIdx: message.oppositeIdx,
-                    },
-                });
-                const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
-                for (const data of results) {
-                    this.logger.log(`채팅 발신 이벤트(4) - ${data.fbToken}에 알림을 보냈다.`);
-                    this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, `${message.message}`);
-                }
+            const results = await this.fbTokenRepository.find({
+                where: {
+                    userIdx: message.oppositeIdx,
+                },
+            });
+            const senderInfo = await this.userService.getUserDetailInfo(message.userIdx);
+            for (const data of results) {
+                this.logger.log(`채팅 발신 이벤트(4) - ${data.fbToken}에 알림을 보냈다.`);
+                this.fCMService.sendFCM(data.fbToken, senderInfo.nickname, `${message.message}`);
             }
             await queryRunner.commitTransaction();
         }
