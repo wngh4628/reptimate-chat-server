@@ -210,7 +210,7 @@ let AuctionChatService = class AuctionChatService {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM(data.fbToken, 'auction', `해당 경매 마감이 ${leftMinute}분 남았습니다`);
+                    this.fCMService.sendFCM(data.fbToken, '경매', `해당 경매 마감이 ${leftMinute}분 남았습니다`);
                 }
             }
         }
@@ -262,7 +262,7 @@ let AuctionChatService = class AuctionChatService {
                     },
                 });
                 for (const data of results) {
-                    this.fCMService.sendFCM(data.fbToken, 'auction', '해당 경매가 마감되었습니다.');
+                    this.fCMService.sendFCM(data.fbToken, '경매', '해당 경매가 마감되었습니다.');
                 }
             }
         }
