@@ -33,7 +33,7 @@ export class AuctionChatService {
   constructor(
     private dataSource: DataSource,
     private readonly redisService: RedisService,
-    private boardAuctionRepository:BoardAuctionRepository,
+    private boardAuctionRepository: BoardAuctionRepository,
     private auctionAlertRepository: AuctionAlertRepository,
     private fbTokenRepository: FbTokenRepository,
     private auctionChatGateway: AuctionChatGateway,
@@ -211,7 +211,6 @@ export class AuctionChatService {
     }
   }
 
-
   @Cron(CronExpression.EVERY_MINUTE)
   async checkSchedules() {
     //const currentTime = '2023-08-14 22:00'; // 테스트용
@@ -248,7 +247,6 @@ export class AuctionChatService {
         },
       });
 
-              
       //노티피케이션 FCM 발송
       for (const data of alertList) {
         const results = await this.fbTokenRepository.find({
@@ -261,7 +259,7 @@ export class AuctionChatService {
           this.fCMService.sendFCM(
             data.fbToken,
             '경매',
-            `해당 경매 마감이 ${leftMinute}분 남았습니다`
+            `해당 경매 마감이 ${leftMinute}분 남았습니다`,
           );
         }
       }
@@ -277,7 +275,6 @@ export class AuctionChatService {
     currentTime: string,
     socketGateway: AuctionChatGateway,
   ) {
-
     const boardAuctions = await this.boardAuctionRepository.findEndTimeByTime(
       currentTime,
     );
@@ -306,7 +303,7 @@ export class AuctionChatService {
       const lastBidderInfo = JSON.parse(bidderList[0]);
 
       // 마지막에 입찰한 유저를 낙찰자(successful_bidder)로 저장
-      data.successfulBidder = lastBidderInfo.userIdx
+      data.successfulBidder = lastBidderInfo.userIdx;
       // 마감 상태 end로 변경해서 저장
       data.state = 'end';
       this.boardAuctionRepository.save(data);
@@ -318,7 +315,7 @@ export class AuctionChatService {
       }
 
       // 방에 들어있는 유저들 중에서, alertList에 있으면 alertList에서 삭제하고, alertList에 없으면 '경매 끝' 메시지를 보낸다
-        // Q: 그럼, 알람설정을 한 사람이 방에 들어있으면 메시지를 못받는건가?
+      // Q: 그럼, 알람설정을 한 사람이 방에 들어있으면 메시지를 못받는건가?
       for (const [userIdx, socket] of userSocketsMap) {
         for (const data of alertList) {
           // 알람설정을 한 유저가 채팅방에 들어있을 경우, 알람리스트에서 삭제한다
@@ -329,7 +326,7 @@ export class AuctionChatService {
           }
         }
       }
-              
+
       // 노티피케이션 발송 (발송대상: 알람설정 o, but 채팅방에 없는 유저)
       for (const data of alertList) {
         const results = await this.fbTokenRepository.find({
@@ -341,7 +338,7 @@ export class AuctionChatService {
           this.fCMService.sendFCM(
             data.fbToken,
             '경매',
-            '해당 경매가 마감되었습니다.'
+            '해당 경매가 마감되었습니다.',
           );
         }
       }
