@@ -211,6 +211,7 @@ export class AuctionChatService {
     }
   }
 
+  // @Cron(CronExpression.EVERY_MINUTE)
   @Cron(CronExpression.EVERY_MINUTE)
   async checkSchedules() {
     //const currentTime = '2023-08-14 22:00'; // 테스트용
@@ -278,6 +279,7 @@ export class AuctionChatService {
     const boardAuctions = await this.boardAuctionRepository.findEndTimeByTime(
       currentTime,
     );
+
     if (boardAuctions.length === 0) {
       console.log('No end auction schedules to send alerts.');
       return;
@@ -290,39 +292,41 @@ export class AuctionChatService {
         },
       });
       // 마감시간에 해당하는 게시글 정보 조회
-      const boardInfo = await this.boardRepository.findOne({
-        where: {
-          idx: data.boardIdx,
-        },
-      });
+      // const boardInfo = await this.boardRepository.findOne({
+      //   where: {
+      //     idx: data.boardIdx,
+      //   },
+      // });
 
       // 레디스에서 마지막에 입찰한 유저의 정보를 불러온다
       const redis = this.redisService.getClient();
       const key = `auction-chat${data.boardIdx}`;
       const bidderList = await redis.zrevrange(key, 0, 0);
-      const lastBidderInfo = JSON.parse(bidderList[0]);
+      if (bidderList.length > 0) {
+        const lastBidderInfo = JSON.parse(bidderList[0]);
 
-      // 마지막에 입찰한 유저를 낙찰자(successful_bidder)로 저장
-      data.successfulBidder = lastBidderInfo.userIdx;
+        // 마지막에 입찰한 유저를 낙찰자(successful_bidder)로 저장
+        data.successfulBidder = lastBidderInfo.userIdx;
+      }
       // 마감 상태 end로 변경해서 저장
       data.state = 'end';
       this.boardAuctionRepository.save(data);
       const rooms = socketGateway.rooms;
       const roomName = `auction-chat-${data.idx.toString()}`;
       const userSocketsMap = rooms.get(roomName);
-      if (!userSocketsMap) {
-        throw new NotFoundException(HttpErrorConstants.CHATROOM_NOT_EXIST);
-      }
-
-      // 방에 들어있는 유저들 중에서, alertList에 있으면 alertList에서 삭제하고, alertList에 없으면 '경매 끝' 메시지를 보낸다
-      // Q: 그럼, 알람설정을 한 사람이 방에 들어있으면 메시지를 못받는건가?
-      for (const [userIdx, socket] of userSocketsMap) {
-        for (const data of alertList) {
-          // 알람설정을 한 유저가 채팅방에 들어있을 경우, 알람리스트에서 삭제한다
-          if (data.userIdx === userIdx) {
-            alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
-          } else {
-            socket.emit('Auction_End', '경매 끝');
+      if (userSocketsMap !== undefined) {
+        // 방에 들어있는 유저들 중에서, alertList에 있으면 alertList에서 삭제하고, alertList에 없으면 '경매 끝' 메시지를 보낸다
+        // Q: 그럼, 알람설정을 한 사람이 방에 들어있으면 메시지를 못받는건가?
+        for (const [userIdx, socket] of userSocketsMap) {
+          for (const data of alertList) {
+            // 알람설정을 한 유저가 채팅방에 들어있을 경우, 알람리스트에서 삭제한다
+            if (data.userIdx === userIdx) {
+              alertList = alertList.filter(
+                (alert) => alert.userIdx !== userIdx,
+              );
+            } else {
+              socket.emit('Auction_End', '경매 끝');
+            }
           }
         }
       }

@@ -21,7 +21,6 @@ const user_entity_1 = require("../user/entities/user.entity");
 const schedule_1 = require("@nestjs/schedule");
 const auction_alert_repository_1 = require("./repositories/auction-alert.repository");
 const auction_chat_gateway_1 = require("./auction_chat.gateway");
-const http_error_objects_1 = require("../../core/http/http-error-objects");
 const fcm_service_1 = require("../../utils/fcm.service");
 const user_fbtoken_repository_1 = require("../user/repositories/user.fbtoken.repository");
 const board_repository_1 = require("../live_chat/repositories/board.repository");
@@ -227,31 +226,27 @@ let AuctionChatService = class AuctionChatService {
                     auctionIdx: data.idx,
                 },
             });
-            const boardInfo = await this.boardRepository.findOne({
-                where: {
-                    idx: data.boardIdx,
-                },
-            });
             const redis = this.redisService.getClient();
             const key = `auction-chat${data.boardIdx}`;
             const bidderList = await redis.zrevrange(key, 0, 0);
-            const lastBidderInfo = JSON.parse(bidderList[0]);
-            data.successfulBidder = lastBidderInfo.userIdx;
+            if (bidderList.length > 0) {
+                const lastBidderInfo = JSON.parse(bidderList[0]);
+                data.successfulBidder = lastBidderInfo.userIdx;
+            }
             data.state = 'end';
             this.boardAuctionRepository.save(data);
             const rooms = socketGateway.rooms;
             const roomName = `auction-chat-${data.idx.toString()}`;
             const userSocketsMap = rooms.get(roomName);
-            if (!userSocketsMap) {
-                throw new common_1.NotFoundException(http_error_objects_1.HttpErrorConstants.CHATROOM_NOT_EXIST);
-            }
-            for (const [userIdx, socket] of userSocketsMap) {
-                for (const data of alertList) {
-                    if (data.userIdx === userIdx) {
-                        alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
-                    }
-                    else {
-                        socket.emit('Auction_End', '경매 끝');
+            if (userSocketsMap !== undefined) {
+                for (const [userIdx, socket] of userSocketsMap) {
+                    for (const data of alertList) {
+                        if (data.userIdx === userIdx) {
+                            alertList = alertList.filter((alert) => alert.userIdx !== userIdx);
+                        }
+                        else {
+                            socket.emit('Auction_End', '경매 끝');
+                        }
                     }
                 }
             }
