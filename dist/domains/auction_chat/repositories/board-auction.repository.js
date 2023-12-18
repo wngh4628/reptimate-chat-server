@@ -13,7 +13,7 @@ const board_auction_entity_1 = require("../entities/board-auction.entity");
 let BoardAuctionRepository = class BoardAuctionRepository extends typeorm_1.Repository {
     async findEndTimeByTime(time) {
         return await this.createQueryBuilder('boardAuction')
-            .where('boardAuction.endTime = :time', { time })
+            .where('boardAuction.endTime <= :time', { time })
             .andWhere('boardAuction.state = :state', { state: 'selling' })
             .getMany();
     }
