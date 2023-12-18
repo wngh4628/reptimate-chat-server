@@ -215,6 +215,7 @@ export class AuctionChatService {
   @Cron(CronExpression.EVERY_MINUTE)
   async checkSchedules() {
     //const currentTime = '2023-08-14 22:00'; // 테스트용
+    moment.tz.setDefault('Asia/Seoul');
     const currentTime = moment().format('YYYY-MM-DD HH:mm');
     const socketGateway = this.auctionChatGateway;
     this.auctionFinishCheck(currentTime, socketGateway);

@@ -176,6 +176,7 @@ let AuctionChatService = class AuctionChatService {
         }
     }
     async checkSchedules() {
+        moment.tz.setDefault('Asia/Seoul');
         const currentTime = moment().format('YYYY-MM-DD HH:mm');
         const socketGateway = this.auctionChatGateway;
         this.auctionFinishCheck(currentTime, socketGateway);
