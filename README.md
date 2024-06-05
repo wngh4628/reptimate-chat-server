@@ -1,7 +1,7 @@
-# IoT Project
+# Reptimate Project
 
-IOT 기기를 원격으로 관리하는 파충류 관련 커뮤니티 서비스
+파충류 분양 플랫폼의 채팅 및 실시간 경매 서버입니다.
 
-- Iot 프로젝트의 채팅 관련 소켓 서버입니다.
 - 이 Repository는 Node.js + Typescript + Nest.js 로 이루어져 있습니다.
-# reptimate-chat-server
+- Socket.io로 만들어졌습니다.
+
